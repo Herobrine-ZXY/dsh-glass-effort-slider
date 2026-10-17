@@ -1,0 +1,63 @@
+{
+  "name": "dsh-glass-effort-slider",
+  "version": "1.9.0",
+  "private": true,
+  "description": "玻璃状推理等级条（Glass Reasoning Effort）：连续拖动 + 松手吸附最近档位 + 弹性落档，键盘 ←/→ 与滚轮一档一档调、↑/↓ 切 Flash/Pro / Glass Reasoning Effort — continuous drag with snap-to-nearest + elastic settle; ←/→ and wheel step one level, ↑/↓ switch Flash/Pro",
+  "license": "MIT",
+  "author": "Herobrine-ZXY",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Herobrine-ZXY/dsh-glass-effort-slider.git"
+  },
+  "homepage": "https://github.com/Herobrine-ZXY/dsh-glass-effort-slider#readme",
+  "bugs": {
+    "url": "https://github.com/Herobrine-ZXY/dsh-glass-effort-slider/issues"
+  },
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "deepseek-harness",
+    "reasoning-effort",
+    "slider",
+    "ui"
+  ],
+  "type": "module",
+  "main": "./lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./lib/client.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "lib/index.js",
+    "lib/client.js",
+    "cordis.patch.yml",
+    "install-profile.ps1",
+    "install.cmd",
+    "pack-dist.ps1",
+    "LICENSE",
+    "docs",
+    "test",
+    "preview",
+    "README.md"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true
+    }
+  },
+  "scripts": {
+    "test": "node test/client.test.mjs",
+    "preview": "node preview/make-preview.mjs",
+    "preview:snap": "node preview/make-snap-figure.mjs",
+    "preview:knob": "node preview/make-knob-figure.mjs",
+    "pack": "powershell -NoProfile -ExecutionPolicy Bypass -File ./pack-dist.ps1"
+  }
+}

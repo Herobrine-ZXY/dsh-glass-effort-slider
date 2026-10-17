@@ -1,0 +1,398 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>dsh-glass-effort-slider — 落档（吸附 + 弹性回弹）图解</title>
+<style>
+body{--dsw-alias-bg-layer-1:#fff;--dsw-alias-bg-layer-2:#f5f5f5;--dsw-alias-bg-layer-3:#fff;--dsw-alias-border-l1:rgb(15 17 21 / 8%);--dsw-alias-label-primary:#0f1115;--dsw-alias-label-secondary:#65676b;--dsw-alias-label-tertiary:#81858c;--dsw-alias-label-caption:#a2a4a6;--dsw-alias-state-business-primary:#4d93f8;--dsw-radius-md:12px;--dsw-focus-ring-width:2px;--dsw-focus-ring-color:#4d93f8;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;padding:26px 30px 34px;background:#fbfbfc;color:var(--dsw-alias-label-primary);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif}
+h1{font-size:17px;margin:0 0 4px}
+.sub{font-size:12.5px;line-height:1.75;color:var(--dsw-alias-label-secondary);margin:0 0 18px;max-width:840px}
+.sub code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;background:#0000000a;padding:1px 4px;border-radius:4px}
+.card{background:#fff;border:1px solid #00000014;border-radius:14px;padding:16px 18px 10px;margin-bottom:18px;box-shadow:0 1px 3px #0000000a}
+.cardTitle{font-size:13px;font-weight:600;margin:0 0 10px;color:var(--dsw-alias-label-secondary)}
+.chart{display:block}
+.grid{stroke:#00000012;stroke-width:1}
+.target{stroke:#9333ea;stroke-width:1.4;stroke-dasharray:5 4}
+.release{stroke:#4d93f8;stroke-width:1.2;stroke-dasharray:2 4;opacity:.75}
+.curve{fill:none;stroke-linecap:round}
+.curve.normal{stroke:#7c3aed;stroke-width:2.6}
+.curve.reduced{stroke:#9ca3af;stroke-width:2;stroke-dasharray:6 5}
+.peakDot{fill:#7c3aed}
+.peakRule{stroke:#7c3aed;stroke-width:1;stroke-dasharray:3 3;opacity:.6}
+.crossDot{fill:#7c3aed;opacity:.85}
+.crossLabel{fill:#8b5cf6}
+.endDot{fill:#fff;stroke:#7c3aed;stroke-width:2}
+.tick{font-size:10.5px;fill:#8b8f96}
+.label{font-size:11px;fill:#6b7280}
+.targetLabel{fill:#7c3aed}
+.releaseLabel{fill:#3b82f6}
+.peakLabel{fill:#6d28d9;font-weight:600}
+.legend{display:flex;gap:18px;font-size:11.5px;color:#6b7280;margin:2px 0 8px 8px;flex-wrap:wrap}
+.legend i{display:inline-block;width:16px;height:3px;border-radius:2px;margin-right:6px;vertical-align:middle}
+.frames{display:flex;flex-direction:column;gap:6px}
+.frame{display:flex;align-items:center;gap:14px;padding:4px 8px;border-radius:10px}
+.frame-peak{background:#7c3aed0f;outline:1px solid #7c3aed33}
+.frame-end{background:#4d93f80d}
+.frameMeta{width:196px;flex:none;font-size:12px;color:var(--dsw-alias-label-secondary);display:flex;flex-direction:column;gap:1px}
+.frameMeta b{color:var(--dsw-alias-label-primary);font-variant-numeric:tabular-nums}
+.frameMeta span{font-variant-numeric:tabular-nums}
+.frameTag{color:#8b8f96;font-size:11px}
+.frame-peak .frameTag{color:#6d28d9;font-weight:600}
+.frameStage{flex:none}
+.frameDelta{width:96px;flex:none;font-size:13px;font-weight:600;color:#6d28d9;font-variant-numeric:tabular-nums;text-align:right}
+.frameDelta small{display:block;font-size:10.5px;font-weight:400;color:#9aa0a6}
+.frameDelta.is-zero{color:#0f9d58}
+.frameStars{width:150px;flex:none;font-size:11px;color:#8b8f96;font-variant-numeric:tabular-nums}
+/* 目标刻度的参考线：一眼看出"旋钮是不是冲过了刻度" */
+.tickRef{position:absolute;top:0;bottom:0;width:0;border-left:1px dashed #9333ea;opacity:.85;pointer-events:none}
+/* 胶片里的粒子静止：图解要的是"位置/能量/星数"，不是动画相位 */
+.frameStage .ces-star,.frameStage .ces-star__dot,.frameStage .ces-energy__sweep{animation:none !important}
+/* ── 以下是**从 lib/client.js 抽取的真 CSS** ── */
+.ces-inline{--ces-accent:var(--dsw-alias-state-business-primary,var(--dsw-static-blue-450,#4d93f8));box-sizing:border-box;flex-basis:100%;width:100%;min-width:0}
+.ces-track{position:relative;box-sizing:border-box;height:28px;margin-top:2px;border-radius:999px;background:var(--dsw-alias-border-l1,rgba(15,17,21,.08));cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+.ces-track:focus-visible{outline:var(--dsw-focus-ring-width,2px) solid var(--dsw-focus-ring-color,var(--ces-accent));outline-offset:2px}
+.ces-fill{position:absolute;inset:0;pointer-events:none}
+.ces-water{position:absolute;left:0;top:0;bottom:0;border-top-left-radius:14px;border-bottom-left-radius:14px;border-top-right-radius:calc(14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1)) calc(14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-sty,1));border-bottom-right-radius:calc(14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1)) calc(14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-sty,1));overflow:hidden;pointer-events:none}
+.ces-water-inner{position:absolute;left:0;right:0;top:-20px;bottom:-20px;transform:rotate(var(--ces-skew,0deg));transform-origin:0 50%}
+.ces-water-inner > .ces-stars{top:20px;height:28px}
+.ces-fill{box-shadow:inset -1.5px 0 0 rgba(255,255,255,.4)}
+body[data-ds-dark-theme] .ces-fill{box-shadow:inset -1.5px 0 0 rgba(255,255,255,.3)}
+.ces-tick{position:absolute;top:50%;width:3px;height:3px;margin:-1.5px 0 0 -1.5px;border-radius:50%;background:color-mix(in srgb,var(--dsw-alias-label-primary,#0f1115) 26%,transparent);pointer-events:none}
+.ces-tick[data-on='1']{background:rgba(255,255,255,.5)}
+.ces-knob{position:absolute;top:50%;width:28px;height:28px;margin:-14px 0 0 -14px;border-radius:50%;overflow:hidden;background:linear-gradient(158deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,.06) 38%,rgba(236,241,252,.03) 66%,rgba(255,255,255,.1) 100%);box-shadow:0 1px 6px rgba(0,0,0,.28),0 2px 12px -2px rgba(0,0,0,.18),0 0 0 .5px rgba(15,23,42,.28),inset 0 1px 1px rgba(255,255,255,.95),inset 0 -1.5px 2px rgba(15,23,42,.12),inset 0 -2.5px 3px -1px rgba(255,255,255,.55),inset 0 0 0 1px rgba(255,255,255,.8),0 0 calc(var(--ces-energy,0) * 12px) rgba(168,85,247,.4);pointer-events:none}
+.ces-knob::after{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(13% 10% at var(--ces-hl,30%) 19%,rgba(255,255,255,.98) 0%,rgba(255,255,255,0) 100%),radial-gradient(72% 60% at calc(var(--ces-hl,30%) + 4%) 26%,rgba(255,255,255,.72) 0%,rgba(255,255,255,.34) 46%,rgba(255,255,255,0) 80%);pointer-events:none}
+.ces-knob::before{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(82% 48% at 50% 118%,rgba(255,255,255,calc(.22 + var(--ces-energy,0) * .4)) 0%,rgba(255,255,255,0) 64%);pointer-events:none}
+body[data-ds-dark-theme] .ces-knob{background:linear-gradient(158deg,rgba(255,255,255,.1) 0%,rgba(255,255,255,.04) 40%,rgba(226,232,246,.02) 68%,rgba(255,255,255,.07) 100%);box-shadow:0 1px 6px rgba(0,0,0,.42),0 2px 12px -2px rgba(0,0,0,.3),0 0 0 .5px rgba(255,255,255,.14),inset 0 1px 1px rgba(255,255,255,.8),inset 0 -1.5px 2px rgba(0,0,0,.28),inset 0 -2.5px 3px -1px rgba(255,255,255,.4),inset 0 0 0 1px rgba(255,255,255,.55),0 0 7px rgba(216,180,254,.22),0 0 calc(var(--ces-energy,0) * 12px) rgba(168,85,247,.45)}
+.ces-knob{transform:scale(calc(var(--ces-press,1) * var(--ces-bounce,1))) scaleX(var(--ces-stx,1)) scaleY(var(--ces-sty,1));transform-origin:50% 50%}
+.ces-inline[data-dragging='1']{--ces-press:.95}
+.ces-inline[data-motion='reduced'][data-dragging='1']{--ces-press:.975}
+@keyframes ces-knob-breathe{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(1.2%,-0.8%,0) scale(1.03)}}
+.ces-inline[data-breath='1'] .ces-knob::after{animation:ces-knob-breathe 4.2s ease-in-out infinite}
+.ces-inline[data-motion='reduced'] .ces-knob::after{animation:none}
+.ces-error{margin-top:6px;font-size:11px;line-height:16px;color:var(--dsw-alias-state-error-primary,#e5484d)}
+.ces-inline[data-energy='1'] .ces-track{box-shadow:0 0 calc(var(--ces-energy,0) * 16px) rgba(168,85,247,.5)}
+.ces-inline[data-energy='0'] .ces-star,.ces-inline[data-energy='0'] .ces-energy__sweep{animation-play-state:paused}
+.ces-energy{position:absolute;top:0;bottom:0;left:0;right:0;overflow:hidden;pointer-events:none;opacity:var(--ces-energy,0);transition:opacity .2s ease;background:linear-gradient(90deg,#3b1178 0%,#6d28d9 30%,#9333ea 62%,#c084fc 100%)}
+.ces-stars{position:absolute;top:0;bottom:0;left:0;right:0;overflow:hidden;pointer-events:none;transition:opacity .2s ease}
+.ces-inline[data-dragging='1'] .ces-energy,.ces-inline[data-dragging='1'] .ces-stars{transition:none}
+.ces-star{position:absolute;left:0;right:0;height:3px;margin-top:-1.5px;pointer-events:none;animation-name:ces-star-sweep;animation-timing-function:linear;animation-iteration-count:infinite}
+.ces-star__dot{position:absolute;left:100%;top:0;width:3px;height:3px;margin-left:-1.5px;border-radius:50%;background:#fff;box-shadow:0 0 4px rgba(255,255,255,.85);opacity:var(--ces-b,1);transform:scale(var(--ces-b,1))}
+@keyframes ces-star-sweep{0%{transform:translate3d(0,0,0);opacity:0}6%{opacity:1}94%{opacity:1}100%{transform:translate3d(-100%,0,0);opacity:0}}
+.ces-energy__sweep{position:absolute;inset:0;background:linear-gradient(100deg,transparent 18%,rgba(255,255,255,.30) 50%,transparent 82%);transform:translateX(100%);animation:ces-sweep 2.4s linear infinite}
+@keyframes ces-sweep{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
+body[data-ds-dark-theme] .ces-star__dot{background:#f5f3ff;box-shadow:0 0 5px rgba(216,180,254,.95)}
+@media (prefers-reduced-motion: reduce){.ces-energy{transition:none}.ces-energy__sweep{display:none}}
+</style>
+</head>
+<body>
+<h1>落档：松手吸附 + 弹性回弹</h1>
+<p class="sub">
+  拖动松手后，先把档位写回最近档位（这一步与旧版一字不差），视觉上再从<b>松手位置</b>弹性吸附到
+  该档位的刻度：<b>冲过一点再弹回来</b>。下面是同一段落的两个视角 —— 曲线是时间上的形状，胶片是像素上的样子。
+  曲线、几何与配色全部抽自 <code>lib/client.js</code>（<code>settlePctFor</code> / <code>snapEaseFor</code> /
+  <code>knobOffsetOf</code> / <code>fillBackgroundFor</code> / <code>energyFor</code>），图解里没有第二份数学。
+  这一段的具体参数：4 档模型、松手在 50.7%（刚好越过分界 50%）→
+  <b>吸附到最近档位 High</b>（刻度 66.7%）；行程 15.93%，
+  ≈156ms 越过刻度、244ms 冲到最高（过冲 +1.59%），
+  420ms 精确停在刻度上 —— 最后那一段是<b>贴着刻度从上方</b>落下来的（easeOutBack 只在终点回到 1.0）。
+</p>
+
+<div class="card">
+  <p class="cardTitle">① 位置-时间曲线（正常 420ms ↔ 减少动态效果 180ms）</p>
+  <div class="legend">
+    <span><i style="background:#7c3aed"></i>正常：easeOutBack，回弹幅度 10% × 行程</span>
+    <span><i style="background:#9ca3af"></i>减少动态效果：180ms，ease-out，<b>不回弹</b></span>
+    <span><i style="background:#9333ea"></i>目标刻度</span>
+    <span><i style="background:#4d93f8"></i>松手位置</span>
+  </div>
+  
+<svg class="chart" viewBox="0 0 780 250" width="780" height="250" role="img"
+     aria-label="落档位置-时间曲线：从 50.7% 弹性吸附到 66.7%，244ms 处冲过刻度再弹回来">
+  <line x1="62" y1="187.46" x2="648" y2="187.46" class="grid"/>
+    <text x="52" y="191.46" class="tick" text-anchor="end">52%</text>
+  <line x1="62" y1="150.89" x2="648" y2="150.89" class="grid"/>
+    <text x="52" y="154.89" class="tick" text-anchor="end">56%</text>
+  <line x1="62" y1="114.32" x2="648" y2="114.32" class="grid"/>
+    <text x="52" y="118.32" class="tick" text-anchor="end">60%</text>
+  <line x1="62" y1="77.75" x2="648" y2="77.75" class="grid"/>
+    <text x="52" y="81.75" class="tick" text-anchor="end">64%</text>
+  <line x1="62" y1="41.18" x2="648" y2="41.18" class="grid"/>
+    <text x="52" y="45.18" class="tick" text-anchor="end">68%</text>
+  <line x1="62.00" y1="26" x2="62.00" y2="210" class="grid"/>
+    <text x="62.00" y="228" class="tick" text-anchor="middle">0ms</text>
+  <line x1="201.52" y1="26" x2="201.52" y2="210" class="grid"/>
+    <text x="201.52" y="228" class="tick" text-anchor="middle">100ms</text>
+  <line x1="341.05" y1="26" x2="341.05" y2="210" class="grid"/>
+    <text x="341.05" y="228" class="tick" text-anchor="middle">200ms</text>
+  <line x1="480.57" y1="26" x2="480.57" y2="210" class="grid"/>
+    <text x="480.57" y="228" class="tick" text-anchor="middle">300ms</text>
+  <line x1="648.00" y1="26" x2="648.00" y2="210" class="grid"/>
+    <text x="648.00" y="228" class="tick" text-anchor="middle">420ms</text>
+
+  <line x1="62" y1="53.37" x2="648" y2="53.37" class="target"/>
+  <text x="656" y="57.37" class="label targetLabel">High 刻度 66.7%</text>
+  <line x1="62" y1="199.03" x2="648" y2="199.03" class="release"/>
+  <text x="656" y="203.03" class="label releaseLabel">松手位置 50.7%</text>
+
+  <path d="M62.00,199.03 L66.19,191.87 L70.37,184.94 L74.56,178.25 L78.74,171.79 L82.93,165.56 L87.11,159.55 L91.30,153.76 L95.49,148.19 L99.67,142.82 L103.86,137.66 L108.04,132.70 L112.23,127.95 L116.41,123.38 L120.60,119.01 L124.79,114.82 L128.97,110.81 L133.16,106.98 L137.34,103.33 L141.53,99.84 L145.71,96.53 L149.90,93.37 L154.09,90.37 L158.27,87.52 L162.46,84.83 L166.64,82.28 L170.83,79.87 L175.01,77.60 L179.20,75.46 L183.39,73.46 L187.57,71.57 L191.76,69.81 L195.94,68.17 L200.13,66.64 L204.31,65.22 L208.50,63.90 L212.69,62.69 L216.87,61.57 L221.06,60.55 L225.24,59.61 L229.43,58.76 L233.61,57.99 L237.80,57.30 L241.99,56.68 L246.17,56.13 L250.36,55.64 L254.54,55.22 L258.73,54.85 L262.91,54.53 L267.10,54.26 L271.29,54.04 L275.47,53.86 L279.66,53.71 L283.84,53.60 L288.03,53.51 L292.21,53.45 L296.40,53.41 L300.59,53.38 L304.77,53.37 L308.96,53.37 L313.14,53.37 L313.14,53.37" class="curve reduced"/>
+  <path d="M62.00,199.03 L66.19,194.18 L70.37,189.43 L74.56,184.78 L78.74,180.21 L82.93,175.74 L87.11,171.36 L91.30,167.07 L95.49,162.87 L99.67,158.75 L103.86,154.73 L108.04,150.79 L112.23,146.93 L116.41,143.16 L120.60,139.48 L124.79,135.88 L128.97,132.36 L133.16,128.92 L137.34,125.56 L141.53,122.28 L145.71,119.08 L149.90,115.96 L154.09,112.92 L158.27,109.95 L162.46,107.06 L166.64,104.24 L170.83,101.49 L175.01,98.82 L179.20,96.22 L183.39,93.69 L187.57,91.23 L191.76,88.84 L195.94,86.52 L200.13,84.27 L204.31,82.08 L208.50,79.96 L212.69,77.91 L216.87,75.92 L221.06,73.99 L225.24,72.12 L229.43,70.32 L233.61,68.58 L237.80,66.89 L241.99,65.27 L246.17,63.70 L250.36,62.20 L254.54,60.74 L258.73,59.35 L262.91,58.01 L267.10,56.72 L271.29,55.48 L275.47,54.30 L279.66,53.17 L283.84,52.09 L288.03,51.06 L292.21,50.07 L296.40,49.14 L300.59,48.25 L304.77,47.41 L308.96,46.61 L313.14,45.86 L317.33,45.15 L321.51,44.49 L325.70,43.86 L329.89,43.28 L334.07,42.74 L338.26,42.23 L342.44,41.77 L346.63,41.34 L350.81,40.95 L355.00,40.59 L359.19,40.27 L363.37,39.99 L367.56,39.73 L371.74,39.51 L375.93,39.32 L380.11,39.16 L384.30,39.04 L388.49,38.94 L392.67,38.86 L396.86,38.82 L401.04,38.80 L405.23,38.81 L409.41,38.84 L413.60,38.90 L417.79,38.97 L421.97,39.07 L426.16,39.20 L430.34,39.34 L434.53,39.50 L438.71,39.68 L442.90,39.88 L447.09,40.09 L451.27,40.32 L455.46,40.57 L459.64,40.83 L463.83,41.10 L468.01,41.39 L472.20,41.68 L476.39,41.99 L480.57,42.31 L484.76,42.64 L488.94,42.98 L493.13,43.32 L497.31,43.67 L501.50,44.02 L505.69,44.38 L509.87,44.75 L514.06,45.12 L518.24,45.49 L522.43,45.86 L526.61,46.23 L530.80,46.60 L534.99,46.97 L539.17,47.34 L543.36,47.70 L547.54,48.07 L551.73,48.42 L555.91,48.77 L560.10,49.12 L564.29,49.46 L568.47,49.79 L572.66,50.11 L576.84,50.42 L581.03,50.72 L585.21,51.01 L589.40,51.28 L593.59,51.54 L597.77,51.79 L601.96,52.03 L606.14,52.25 L610.33,52.45 L614.51,52.63 L618.70,52.80 L622.89,52.94 L627.07,53.07 L631.26,53.17 L635.44,53.26 L639.63,53.32 L643.81,53.35 L648.00,53.37 L648.00,53.37" class="curve normal"/>
+
+  <line x1="401.74" y1="38.80" x2="401.74" y2="53.37" class="peakRule"/>
+  <circle cx="401.74" cy="38.80" r="5" class="peakDot"/>
+  <text x="401.74" y="26.80" class="label peakLabel" text-anchor="middle">峰值 68.26%（过冲 +1.59%）· 244ms</text>
+  <circle cx="278.96" cy="53.37" r="3.5" class="crossDot"/>
+  <text x="278.96" y="83.37" class="label crossLabel" text-anchor="middle">156ms 越过刻度（开始过冲）</text>
+  <circle cx="648.00" cy="53.37" r="4.5" class="endDot"/>
+  <text x="648.00" y="39.37" class="label" text-anchor="end">420ms 精确停在刻度</text>
+</svg>
+</div>
+
+<div class="card">
+  <p class="cardTitle">② 逐帧胶片（同一段落档，10 帧）</p>
+  <div class="frames">
+    
+  <div class="frame">
+    <div class="frameMeta">
+      <b>0ms</b>
+      <span>位置 50.74%</span>
+      <span class="frameTag">松手瞬间</span>
+    </div>
+    <div class="frameStage">
+      <div class="ces-inline" data-energy="1" data-settling="1" style="--ces-energy:0.2610;width:340px">
+        <div class="ces-track" role="slider">
+          <div class="ces-water" style="width:calc(calc(14px + 0.5074 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1))"><div class="ces-water-inner">
+            <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(114,97,241))"></div>
+            <div class="ces-energy"></div>
+            <div class="ces-stars" style="opacity:0.704"><span class="ces-star" style="top:52%;animation:none"><span class="ces-star__dot" style="left:61.8%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:84%;animation:none"><span class="ces-star__dot" style="left:23.6%;--ces-b:0.671;animation:none"></span></span><span class="ces-star" style="top:64%;animation:none"><span class="ces-star__dot" style="left:85.4%;--ces-b:0.703;animation:none"></span></span><span class="ces-star" style="top:16%;animation:none"><span class="ces-star__dot" style="left:47.2%;--ces-b:0.842;animation:none"></span></span><span class="ces-star" style="top:92%;animation:none"><span class="ces-star__dot" style="left:9.0%;--ces-b:0.873;animation:none"></span></span><span class="ces-star" style="top:44%;animation:none"><span class="ces-star__dot" style="left:70.8%;--ces-b:0.905;animation:none"></span></span></div>
+          </div></div>
+          <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+          <span class="tickRef" style="left:calc(14px + 0.6667 * (100% - 28px))"></span>
+          <div class="ces-knob" style="left:calc(14px + 0.5074 * (100% - 28px));--ces-hl:29.9%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="frameDelta">-15.93%<small>相对刻度</small></div>
+    <div class="frameStars">6 颗星 · 能量 0.26</div>
+  </div>
+
+  <div class="frame">
+    <div class="frameMeta">
+      <b>40ms</b>
+      <span>位置 56.98%</span>
+      <span class="frameTag">回落中</span>
+    </div>
+    <div class="frameStage">
+      <div class="ces-inline" data-energy="1" data-settling="1" style="--ces-energy:0.3547;width:340px">
+        <div class="ces-track" role="slider">
+          <div class="ces-water" style="width:calc(calc(14px + 0.5698 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1))"><div class="ces-water-inner">
+            <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(127,79,238))"></div>
+            <div class="ces-energy"></div>
+            <div class="ces-stars" style="opacity:0.742"><span class="ces-star" style="top:52%;animation:none"><span class="ces-star__dot" style="left:61.8%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:84%;animation:none"><span class="ces-star__dot" style="left:23.6%;--ces-b:0.671;animation:none"></span></span><span class="ces-star" style="top:64%;animation:none"><span class="ces-star__dot" style="left:85.4%;--ces-b:0.703;animation:none"></span></span><span class="ces-star" style="top:16%;animation:none"><span class="ces-star__dot" style="left:47.2%;--ces-b:0.842;animation:none"></span></span><span class="ces-star" style="top:92%;animation:none"><span class="ces-star__dot" style="left:9.0%;--ces-b:0.873;animation:none"></span></span><span class="ces-star" style="top:44%;animation:none"><span class="ces-star__dot" style="left:70.8%;--ces-b:0.905;animation:none"></span></span><span class="ces-star" style="top:76%;animation:none"><span class="ces-star__dot" style="left:32.6%;--ces-b:0.545;animation:none"></span></span><span class="ces-star" style="top:56%;animation:none"><span class="ces-star__dot" style="left:94.4%;--ces-b:0.577;animation:none"></span></span></div>
+          </div></div>
+          <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+          <span class="tickRef" style="left:calc(14px + 0.6667 * (100% - 28px))"></span>
+          <div class="ces-knob" style="left:calc(14px + 0.5698 * (100% - 28px));--ces-hl:29.2%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="frameDelta">-9.69%<small>相对刻度</small></div>
+    <div class="frameStars">8 颗星 · 能量 0.35</div>
+  </div>
+
+  <div class="frame">
+    <div class="frameMeta">
+      <b>80ms</b>
+      <span>位置 61.60%</span>
+      <span class="frameTag">回落中</span>
+    </div>
+    <div class="frameStage">
+      <div class="ces-inline" data-energy="1" data-settling="1" style="--ces-energy:0.4240;width:340px">
+        <div class="ces-track" role="slider">
+          <div class="ces-water" style="width:calc(calc(14px + 0.616 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1))"><div class="ces-water-inner">
+            <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(136,66,236))"></div>
+            <div class="ces-energy"></div>
+            <div class="ces-stars" style="opacity:0.770"><span class="ces-star" style="top:52%;animation:none"><span class="ces-star__dot" style="left:61.8%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:84%;animation:none"><span class="ces-star__dot" style="left:23.6%;--ces-b:0.671;animation:none"></span></span><span class="ces-star" style="top:64%;animation:none"><span class="ces-star__dot" style="left:85.4%;--ces-b:0.703;animation:none"></span></span><span class="ces-star" style="top:16%;animation:none"><span class="ces-star__dot" style="left:47.2%;--ces-b:0.842;animation:none"></span></span><span class="ces-star" style="top:92%;animation:none"><span class="ces-star__dot" style="left:9.0%;--ces-b:0.873;animation:none"></span></span><span class="ces-star" style="top:44%;animation:none"><span class="ces-star__dot" style="left:70.8%;--ces-b:0.905;animation:none"></span></span><span class="ces-star" style="top:76%;animation:none"><span class="ces-star__dot" style="left:32.6%;--ces-b:0.545;animation:none"></span></span><span class="ces-star" style="top:56%;animation:none"><span class="ces-star__dot" style="left:94.4%;--ces-b:0.577;animation:none"></span></span><span class="ces-star" style="top:88%;animation:none"><span class="ces-star__dot" style="left:56.2%;--ces-b:0.608;animation:none"></span></span></div>
+          </div></div>
+          <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+          <span class="tickRef" style="left:calc(14px + 0.6667 * (100% - 28px))"></span>
+          <div class="ces-knob" style="left:calc(14px + 0.616 * (100% - 28px));--ces-hl:28.6%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="frameDelta">-5.07%<small>相对刻度</small></div>
+    <div class="frameStars">9 颗星 · 能量 0.42</div>
+  </div>
+
+  <div class="frame">
+    <div class="frameMeta">
+      <b>120ms</b>
+      <span>位置 64.81%</span>
+      <span class="frameTag">回落中</span>
+    </div>
+    <div class="frameStage">
+      <div class="ces-inline" data-energy="1" data-settling="1" style="--ces-energy:0.4722;width:340px">
+        <div class="ces-track" role="slider">
+          <div class="ces-water" style="width:calc(calc(14px + 0.6481 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1))"><div class="ces-water-inner">
+            <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(143,56,235))"></div>
+            <div class="ces-energy"></div>
+            <div class="ces-stars" style="opacity:0.789"><span class="ces-star" style="top:52%;animation:none"><span class="ces-star__dot" style="left:61.8%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:84%;animation:none"><span class="ces-star__dot" style="left:23.6%;--ces-b:0.671;animation:none"></span></span><span class="ces-star" style="top:64%;animation:none"><span class="ces-star__dot" style="left:85.4%;--ces-b:0.703;animation:none"></span></span><span class="ces-star" style="top:16%;animation:none"><span class="ces-star__dot" style="left:47.2%;--ces-b:0.842;animation:none"></span></span><span class="ces-star" style="top:92%;animation:none"><span class="ces-star__dot" style="left:9.0%;--ces-b:0.873;animation:none"></span></span><span class="ces-star" style="top:44%;animation:none"><span class="ces-star__dot" style="left:70.8%;--ces-b:0.905;animation:none"></span></span><span class="ces-star" style="top:76%;animation:none"><span class="ces-star__dot" style="left:32.6%;--ces-b:0.545;animation:none"></span></span><span class="ces-star" style="top:56%;animation:none"><span class="ces-star__dot" style="left:94.4%;--ces-b:0.577;animation:none"></span></span><span class="ces-star" style="top:88%;animation:none"><span class="ces-star__dot" style="left:56.2%;--ces-b:0.608;animation:none"></span></span><span class="ces-star" style="top:40%;animation:none"><span class="ces-star__dot" style="left:18.0%;--ces-b:0.639;animation:none"></span></span></div>
+          </div></div>
+          <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+          <span class="tickRef" style="left:calc(14px + 0.6667 * (100% - 28px))"></span>
+          <div class="ces-knob" style="left:calc(14px + 0.6481 * (100% - 28px));--ces-hl:28.2%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="frameDelta">-1.85%<small>相对刻度</small></div>
+    <div class="frameStars">10 颗星 · 能量 0.47</div>
+  </div>
+
+  <div class="frame">
+    <div class="frameMeta">
+      <b>160ms</b>
+      <span>位置 66.84%</span>
+      <span class="frameTag">回弹中（仍在刻度右侧）</span>
+    </div>
+    <div class="frameStage">
+      <div class="ces-inline" data-energy="1" data-settling="1" style="--ces-energy:0.5027;width:340px">
+        <div class="ces-track" role="slider">
+          <div class="ces-water" style="width:calc(calc(14px + 0.6684 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1))"><div class="ces-water-inner">
+            <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(147,51,234))"></div>
+            <div class="ces-energy"></div>
+            <div class="ces-stars" style="opacity:0.801"><span class="ces-star" style="top:52%;animation:none"><span class="ces-star__dot" style="left:61.8%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:84%;animation:none"><span class="ces-star__dot" style="left:23.6%;--ces-b:0.671;animation:none"></span></span><span class="ces-star" style="top:64%;animation:none"><span class="ces-star__dot" style="left:85.4%;--ces-b:0.703;animation:none"></span></span><span class="ces-star" style="top:16%;animation:none"><span class="ces-star__dot" style="left:47.2%;--ces-b:0.842;animation:none"></span></span><span class="ces-star" style="top:92%;animation:none"><span class="ces-star__dot" style="left:9.0%;--ces-b:0.873;animation:none"></span></span><span class="ces-star" style="top:44%;animation:none"><span class="ces-star__dot" style="left:70.8%;--ces-b:0.905;animation:none"></span></span><span class="ces-star" style="top:76%;animation:none"><span class="ces-star__dot" style="left:32.6%;--ces-b:0.545;animation:none"></span></span><span class="ces-star" style="top:56%;animation:none"><span class="ces-star__dot" style="left:94.4%;--ces-b:0.577;animation:none"></span></span><span class="ces-star" style="top:88%;animation:none"><span class="ces-star__dot" style="left:56.2%;--ces-b:0.608;animation:none"></span></span><span class="ces-star" style="top:40%;animation:none"><span class="ces-star__dot" style="left:18.0%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:36%;animation:none"><span class="ces-star__dot" style="left:79.8%;--ces-b:0.779;animation:none"></span></span></div>
+          </div></div>
+          <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+          <span class="tickRef" style="left:calc(14px + 0.6667 * (100% - 28px))"></span>
+          <div class="ces-knob" style="left:calc(14px + 0.6684 * (100% - 28px));--ces-hl:28.0%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="frameDelta">+0.18%<small>相对刻度</small></div>
+    <div class="frameStars">11 颗星 · 能量 0.50</div>
+  </div>
+
+  <div class="frame">
+    <div class="frameMeta">
+      <b>200ms</b>
+      <span>位置 67.92%</span>
+      <span class="frameTag">回弹中（仍在刻度右侧）</span>
+    </div>
+    <div class="frameStage">
+      <div class="ces-inline" data-energy="1" data-settling="1" style="--ces-energy:0.5188;width:340px">
+        <div class="ces-track" role="slider">
+          <div class="ces-water" style="width:calc(calc(14px + 0.6792 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1))"><div class="ces-water-inner">
+            <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(144,50,231))"></div>
+            <div class="ces-energy"></div>
+            <div class="ces-stars" style="opacity:0.808"><span class="ces-star" style="top:52%;animation:none"><span class="ces-star__dot" style="left:61.8%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:84%;animation:none"><span class="ces-star__dot" style="left:23.6%;--ces-b:0.671;animation:none"></span></span><span class="ces-star" style="top:64%;animation:none"><span class="ces-star__dot" style="left:85.4%;--ces-b:0.703;animation:none"></span></span><span class="ces-star" style="top:16%;animation:none"><span class="ces-star__dot" style="left:47.2%;--ces-b:0.842;animation:none"></span></span><span class="ces-star" style="top:92%;animation:none"><span class="ces-star__dot" style="left:9.0%;--ces-b:0.873;animation:none"></span></span><span class="ces-star" style="top:44%;animation:none"><span class="ces-star__dot" style="left:70.8%;--ces-b:0.905;animation:none"></span></span><span class="ces-star" style="top:76%;animation:none"><span class="ces-star__dot" style="left:32.6%;--ces-b:0.545;animation:none"></span></span><span class="ces-star" style="top:56%;animation:none"><span class="ces-star__dot" style="left:94.4%;--ces-b:0.577;animation:none"></span></span><span class="ces-star" style="top:88%;animation:none"><span class="ces-star__dot" style="left:56.2%;--ces-b:0.608;animation:none"></span></span><span class="ces-star" style="top:40%;animation:none"><span class="ces-star__dot" style="left:18.0%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:36%;animation:none"><span class="ces-star__dot" style="left:79.8%;--ces-b:0.779;animation:none"></span></span></div>
+          </div></div>
+          <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+          <span class="tickRef" style="left:calc(14px + 0.6667 * (100% - 28px))"></span>
+          <div class="ces-knob" style="left:calc(14px + 0.6792 * (100% - 28px));--ces-hl:27.8%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="frameDelta">+1.25%<small>相对刻度</small></div>
+    <div class="frameStars">11 颗星 · 能量 0.52</div>
+  </div>
+
+  <div class="frame frame-peak">
+    <div class="frameMeta">
+      <b>244ms</b>
+      <span>位置 68.26%</span>
+      <span class="frameTag">峰值 · 过冲最大</span>
+    </div>
+    <div class="frameStage">
+      <div class="ces-inline" data-energy="1" data-settling="1" style="--ces-energy:0.5239;width:340px">
+        <div class="ces-track" role="slider">
+          <div class="ces-water" style="width:calc(calc(14px + 0.6826 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1))"><div class="ces-water-inner">
+            <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(144,50,230))"></div>
+            <div class="ces-energy"></div>
+            <div class="ces-stars" style="opacity:0.810"><span class="ces-star" style="top:52%;animation:none"><span class="ces-star__dot" style="left:61.8%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:84%;animation:none"><span class="ces-star__dot" style="left:23.6%;--ces-b:0.671;animation:none"></span></span><span class="ces-star" style="top:64%;animation:none"><span class="ces-star__dot" style="left:85.4%;--ces-b:0.703;animation:none"></span></span><span class="ces-star" style="top:16%;animation:none"><span class="ces-star__dot" style="left:47.2%;--ces-b:0.842;animation:none"></span></span><span class="ces-star" style="top:92%;animation:none"><span class="ces-star__dot" style="left:9.0%;--ces-b:0.873;animation:none"></span></span><span class="ces-star" style="top:44%;animation:none"><span class="ces-star__dot" style="left:70.8%;--ces-b:0.905;animation:none"></span></span><span class="ces-star" style="top:76%;animation:none"><span class="ces-star__dot" style="left:32.6%;--ces-b:0.545;animation:none"></span></span><span class="ces-star" style="top:56%;animation:none"><span class="ces-star__dot" style="left:94.4%;--ces-b:0.577;animation:none"></span></span><span class="ces-star" style="top:88%;animation:none"><span class="ces-star__dot" style="left:56.2%;--ces-b:0.608;animation:none"></span></span><span class="ces-star" style="top:40%;animation:none"><span class="ces-star__dot" style="left:18.0%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:36%;animation:none"><span class="ces-star__dot" style="left:79.8%;--ces-b:0.779;animation:none"></span></span><span class="ces-star" style="top:68%;animation:none"><span class="ces-star__dot" style="left:41.6%;--ces-b:0.811;animation:none"></span></span></div>
+          </div></div>
+          <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+          <span class="tickRef" style="left:calc(14px + 0.6667 * (100% - 28px))"></span>
+          <div class="ces-knob" style="left:calc(14px + 0.6826 * (100% - 28px));--ces-hl:27.8%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="frameDelta">+1.59%<small>相对刻度</small></div>
+    <div class="frameStars">12 颗星 · 能量 0.52</div>
+  </div>
+
+  <div class="frame">
+    <div class="frameMeta">
+      <b>300ms</b>
+      <span>位置 67.88%</span>
+      <span class="frameTag">回弹中（仍在刻度右侧）</span>
+    </div>
+    <div class="frameStage">
+      <div class="ces-inline" data-energy="1" data-settling="1" style="--ces-energy:0.5181;width:340px">
+        <div class="ces-track" role="slider">
+          <div class="ces-water" style="width:calc(calc(14px + 0.6788 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1))"><div class="ces-water-inner">
+            <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(144,50,231))"></div>
+            <div class="ces-energy"></div>
+            <div class="ces-stars" style="opacity:0.807"><span class="ces-star" style="top:52%;animation:none"><span class="ces-star__dot" style="left:61.8%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:84%;animation:none"><span class="ces-star__dot" style="left:23.6%;--ces-b:0.671;animation:none"></span></span><span class="ces-star" style="top:64%;animation:none"><span class="ces-star__dot" style="left:85.4%;--ces-b:0.703;animation:none"></span></span><span class="ces-star" style="top:16%;animation:none"><span class="ces-star__dot" style="left:47.2%;--ces-b:0.842;animation:none"></span></span><span class="ces-star" style="top:92%;animation:none"><span class="ces-star__dot" style="left:9.0%;--ces-b:0.873;animation:none"></span></span><span class="ces-star" style="top:44%;animation:none"><span class="ces-star__dot" style="left:70.8%;--ces-b:0.905;animation:none"></span></span><span class="ces-star" style="top:76%;animation:none"><span class="ces-star__dot" style="left:32.6%;--ces-b:0.545;animation:none"></span></span><span class="ces-star" style="top:56%;animation:none"><span class="ces-star__dot" style="left:94.4%;--ces-b:0.577;animation:none"></span></span><span class="ces-star" style="top:88%;animation:none"><span class="ces-star__dot" style="left:56.2%;--ces-b:0.608;animation:none"></span></span><span class="ces-star" style="top:40%;animation:none"><span class="ces-star__dot" style="left:18.0%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:36%;animation:none"><span class="ces-star__dot" style="left:79.8%;--ces-b:0.779;animation:none"></span></span></div>
+          </div></div>
+          <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+          <span class="tickRef" style="left:calc(14px + 0.6667 * (100% - 28px))"></span>
+          <div class="ces-knob" style="left:calc(14px + 0.6788 * (100% - 28px));--ces-hl:27.9%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="frameDelta">+1.21%<small>相对刻度</small></div>
+    <div class="frameStars">11 颗星 · 能量 0.52</div>
+  </div>
+
+  <div class="frame">
+    <div class="frameMeta">
+      <b>360ms</b>
+      <span>位置 67.09%</span>
+      <span class="frameTag">回弹中（仍在刻度右侧）</span>
+    </div>
+    <div class="frameStage">
+      <div class="ces-inline" data-energy="1" data-settling="1" style="--ces-energy:0.5064;width:340px">
+        <div class="ces-track" role="slider">
+          <div class="ces-water" style="width:calc(calc(14px + 0.6709 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1))"><div class="ces-water-inner">
+            <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(146,51,233))"></div>
+            <div class="ces-energy"></div>
+            <div class="ces-stars" style="opacity:0.803"><span class="ces-star" style="top:52%;animation:none"><span class="ces-star__dot" style="left:61.8%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:84%;animation:none"><span class="ces-star__dot" style="left:23.6%;--ces-b:0.671;animation:none"></span></span><span class="ces-star" style="top:64%;animation:none"><span class="ces-star__dot" style="left:85.4%;--ces-b:0.703;animation:none"></span></span><span class="ces-star" style="top:16%;animation:none"><span class="ces-star__dot" style="left:47.2%;--ces-b:0.842;animation:none"></span></span><span class="ces-star" style="top:92%;animation:none"><span class="ces-star__dot" style="left:9.0%;--ces-b:0.873;animation:none"></span></span><span class="ces-star" style="top:44%;animation:none"><span class="ces-star__dot" style="left:70.8%;--ces-b:0.905;animation:none"></span></span><span class="ces-star" style="top:76%;animation:none"><span class="ces-star__dot" style="left:32.6%;--ces-b:0.545;animation:none"></span></span><span class="ces-star" style="top:56%;animation:none"><span class="ces-star__dot" style="left:94.4%;--ces-b:0.577;animation:none"></span></span><span class="ces-star" style="top:88%;animation:none"><span class="ces-star__dot" style="left:56.2%;--ces-b:0.608;animation:none"></span></span><span class="ces-star" style="top:40%;animation:none"><span class="ces-star__dot" style="left:18.0%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:36%;animation:none"><span class="ces-star__dot" style="left:79.8%;--ces-b:0.779;animation:none"></span></span></div>
+          </div></div>
+          <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+          <span class="tickRef" style="left:calc(14px + 0.6667 * (100% - 28px))"></span>
+          <div class="ces-knob" style="left:calc(14px + 0.6709 * (100% - 28px));--ces-hl:27.9%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="frameDelta">+0.43%<small>相对刻度</small></div>
+    <div class="frameStars">11 颗星 · 能量 0.51</div>
+  </div>
+
+  <div class="frame frame-end">
+    <div class="frameMeta">
+      <b>420ms</b>
+      <span>位置 66.67%</span>
+      <span class="frameTag">落定 · 精确刻度</span>
+    </div>
+    <div class="frameStage">
+      <div class="ces-inline" data-energy="1" data-settling="1" style="--ces-energy:0.5000;width:340px">
+        <div class="ces-track" role="slider">
+          <div class="ces-water" style="width:calc(calc(14px + 0.6667 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1))"><div class="ces-water-inner">
+            <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(147,51,234))"></div>
+            <div class="ces-energy"></div>
+            <div class="ces-stars" style="opacity:0.800"><span class="ces-star" style="top:52%;animation:none"><span class="ces-star__dot" style="left:61.8%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:84%;animation:none"><span class="ces-star__dot" style="left:23.6%;--ces-b:0.671;animation:none"></span></span><span class="ces-star" style="top:64%;animation:none"><span class="ces-star__dot" style="left:85.4%;--ces-b:0.703;animation:none"></span></span><span class="ces-star" style="top:16%;animation:none"><span class="ces-star__dot" style="left:47.2%;--ces-b:0.842;animation:none"></span></span><span class="ces-star" style="top:92%;animation:none"><span class="ces-star__dot" style="left:9.0%;--ces-b:0.873;animation:none"></span></span><span class="ces-star" style="top:44%;animation:none"><span class="ces-star__dot" style="left:70.8%;--ces-b:0.905;animation:none"></span></span><span class="ces-star" style="top:76%;animation:none"><span class="ces-star__dot" style="left:32.6%;--ces-b:0.545;animation:none"></span></span><span class="ces-star" style="top:56%;animation:none"><span class="ces-star__dot" style="left:94.4%;--ces-b:0.577;animation:none"></span></span><span class="ces-star" style="top:88%;animation:none"><span class="ces-star__dot" style="left:56.2%;--ces-b:0.608;animation:none"></span></span><span class="ces-star" style="top:40%;animation:none"><span class="ces-star__dot" style="left:18.0%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:36%;animation:none"><span class="ces-star__dot" style="left:79.8%;--ces-b:0.779;animation:none"></span></span></div>
+          </div></div>
+          <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+          <span class="tickRef" style="left:calc(14px + 0.6667 * (100% - 28px))"></span>
+          <div class="ces-knob" style="left:calc(14px + 0.6667 * (100% - 28px));--ces-hl:28.0%"></div>
+        </div>
+      </div>
+    </div>
+    <div class="frameDelta is-zero">+0.00%<small>相对刻度</small></div>
+    <div class="frameStars">11 颗星 · 能量 0.50</div>
+  </div>
+  </div>
+</div>
+</body>
+</html>

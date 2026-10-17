@@ -1,0 +1,17 @@
+{
+  "name": "dsh-glass-effort-slider",
+  "owner": "Herobrine-ZXY",
+  "url": "https://github.com/Herobrine-ZXY/dsh-glass-effort-slider",
+  "category": "ui",
+  "description": {
+    "zh": "把官方模型菜单的「推理等级」改成一条可拖动的连续滑条：iOS 26 式液态玻璃珠子、随拖动速度倾斜出落差并在松手后荡波的水面、弹性吸附落档，另支持键盘 ←/→ 调档与 ↑/↓ 切 Flash/Pro、Home/End 跳两端、悬停滚轮调档。零依赖、不联网、不读凭据、不写文件。",
+    "en": "Turns the official reasoning-effort menu row into a draggable continuous slider: an iOS-26 style liquid-glass knob, a velocity-tilted water fill that sloshes when it settles, magnetic snap-to-nearest, plus keyboard (arrows, Home/End) and hover-wheel stepping. Zero dependencies, no network, no credentials, no file writes."
+  },
+  "npm": null,
+  "tarball": null,
+  "install": "dsh plugin --profile web add github:Herobrine-ZXY/dsh-glass-effort-slider",
+  "screenshots": [
+    "https://raw.githubusercontent.com/Herobrine-ZXY/dsh-glass-effort-slider/HEAD/preview/knob-glass.png",
+    "https://raw.githubusercontent.com/Herobrine-ZXY/dsh-glass-effort-slider/HEAD/preview/snap-frames.png"
+  ]
+}

@@ -1,0 +1,6 @@
+# Build output (pack-dist.ps1) and local junk
+dist/
+node_modules/
+*.log
+.DS_Store
+Thumbs.db

@@ -1,0 +1,436 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>dsh-glass-effort-slider — 旋钮材质特写（液态玻璃）</title>
+<style>
+body{--dsw-alias-bg-layer-1:#fff;--dsw-alias-bg-layer-2:#f5f5f5;--dsw-alias-bg-layer-3:#fff;--dsw-alias-border-l1:rgb(15 17 21 / 8%);--dsw-alias-label-primary:#0f1115;--dsw-alias-label-secondary:#65676b;--dsw-alias-label-tertiary:#81858c;--dsw-alias-label-caption:#a2a4a6;--dsw-alias-state-business-primary:#4d93f8;--dsw-radius-md:12px;--dsw-focus-ring-width:2px;--dsw-focus-ring-color:#4d93f8;color-scheme:light}
+*{box-sizing:border-box}
+body{margin:0;padding:24px 28px 30px;background:#fbfbfc;color:var(--dsw-alias-label-primary);font-family:system-ui,-apple-system,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif}
+h1{font-size:16px;margin:0 0 4px}
+.sub{font-size:12.5px;line-height:1.75;color:var(--dsw-alias-label-secondary);margin:0 0 18px;max-width:900px}
+.sub code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:12px;background:#0000000a;padding:1px 4px;border-radius:4px}
+.card{background:#fff;border:1px solid #00000014;border-radius:14px;padding:14px 18px 16px;margin-bottom:16px;box-shadow:0 1px 3px #0000000a}
+.cardTitle{font-size:12.5px;font-weight:600;margin:0 0 10px;color:var(--dsw-alias-label-secondary)}
+.dark{background:#1b1c20;border-color:#ffffff1f;color:#ebeef2}
+.dark .cardTitle{color:#adb2b8}
+.row{display:flex;align-items:center;gap:14px;padding:5px 0}
+.row + .row{border-top:1px dashed #0000000f}
+.dark .row + .row{border-top-color:#ffffff14}
+.tag{width:52px;flex:none;font-size:12px;color:var(--dsw-alias-label-secondary);font-variant-numeric:tabular-nums}
+.detail{margin-left:14px;font-size:11.5px;color:var(--dsw-alias-label-tertiary);font-variant-numeric:tabular-nums}
+.dark .tag{color:#adb2b8}
+.closeups{display:flex;gap:14px;flex-wrap:wrap}
+.closeup{position:relative;overflow:hidden;border-radius:12px;background:linear-gradient(90deg,#ffffff00,#ffffff00)}
+.closeup .closeupInner{position:absolute;left:0;top:0}
+.closeupNote{position:absolute;right:8px;bottom:6px;font-size:11px;color:var(--dsw-alias-label-tertiary);background:#ffffffc9;border-radius:6px;padding:1px 6px}
+/* 特写里的粒子静止（要看清材质，不是看动画相位） */
+.closeup .ces-star,.closeup .ces-star__dot{animation:none !important}
+/* ── 以下是**从 lib/client.js 抽取的真 CSS** ── */
+.ces-inline{--ces-accent:var(--dsw-alias-state-business-primary,var(--dsw-static-blue-450,#4d93f8));box-sizing:border-box;flex-basis:100%;width:100%;min-width:0}
+.ces-track{position:relative;box-sizing:border-box;height:28px;margin-top:2px;border-radius:999px;background:var(--dsw-alias-border-l1,rgba(15,17,21,.08));cursor:pointer;touch-action:none;user-select:none;-webkit-user-select:none}
+.ces-track:focus-visible{outline:var(--dsw-focus-ring-width,2px) solid var(--dsw-focus-ring-color,var(--ces-accent));outline-offset:2px}
+.ces-fill{position:absolute;inset:0;pointer-events:none}
+.ces-water{position:absolute;left:0;top:0;bottom:0;border-top-left-radius:14px;border-bottom-left-radius:14px;border-top-right-radius:calc(14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1)) calc(14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-sty,1));border-bottom-right-radius:calc(14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1)) calc(14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-sty,1));overflow:hidden;pointer-events:none}
+.ces-water-inner{position:absolute;left:0;right:0;top:-20px;bottom:-20px;transform:rotate(var(--ces-skew,0deg));transform-origin:0 50%}
+.ces-water-inner > .ces-stars{top:20px;height:28px}
+.ces-fill{box-shadow:inset -1.5px 0 0 rgba(255,255,255,.4)}
+body[data-ds-dark-theme] .ces-fill{box-shadow:inset -1.5px 0 0 rgba(255,255,255,.3)}
+.ces-tick{position:absolute;top:50%;width:3px;height:3px;margin:-1.5px 0 0 -1.5px;border-radius:50%;background:color-mix(in srgb,var(--dsw-alias-label-primary,#0f1115) 26%,transparent);pointer-events:none}
+.ces-tick[data-on='1']{background:rgba(255,255,255,.5)}
+.ces-knob{position:absolute;top:50%;width:28px;height:28px;margin:-14px 0 0 -14px;border-radius:50%;overflow:hidden;background:linear-gradient(158deg,rgba(255,255,255,.16) 0%,rgba(255,255,255,.06) 38%,rgba(236,241,252,.03) 66%,rgba(255,255,255,.1) 100%);box-shadow:0 1px 6px rgba(0,0,0,.28),0 2px 12px -2px rgba(0,0,0,.18),0 0 0 .5px rgba(15,23,42,.28),inset 0 1px 1px rgba(255,255,255,.95),inset 0 -1.5px 2px rgba(15,23,42,.12),inset 0 -2.5px 3px -1px rgba(255,255,255,.55),inset 0 0 0 1px rgba(255,255,255,.8),0 0 calc(var(--ces-energy,0) * 12px) rgba(168,85,247,.4);pointer-events:none}
+.ces-knob::after{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(13% 10% at var(--ces-hl,30%) 19%,rgba(255,255,255,.98) 0%,rgba(255,255,255,0) 100%),radial-gradient(72% 60% at calc(var(--ces-hl,30%) + 4%) 26%,rgba(255,255,255,.72) 0%,rgba(255,255,255,.34) 46%,rgba(255,255,255,0) 80%);pointer-events:none}
+.ces-knob::before{content:'';position:absolute;inset:0;border-radius:50%;background:radial-gradient(82% 48% at 50% 118%,rgba(255,255,255,calc(.22 + var(--ces-energy,0) * .4)) 0%,rgba(255,255,255,0) 64%);pointer-events:none}
+body[data-ds-dark-theme] .ces-knob{background:linear-gradient(158deg,rgba(255,255,255,.1) 0%,rgba(255,255,255,.04) 40%,rgba(226,232,246,.02) 68%,rgba(255,255,255,.07) 100%);box-shadow:0 1px 6px rgba(0,0,0,.42),0 2px 12px -2px rgba(0,0,0,.3),0 0 0 .5px rgba(255,255,255,.14),inset 0 1px 1px rgba(255,255,255,.8),inset 0 -1.5px 2px rgba(0,0,0,.28),inset 0 -2.5px 3px -1px rgba(255,255,255,.4),inset 0 0 0 1px rgba(255,255,255,.55),0 0 7px rgba(216,180,254,.22),0 0 calc(var(--ces-energy,0) * 12px) rgba(168,85,247,.45)}
+.ces-knob{transform:scale(calc(var(--ces-press,1) * var(--ces-bounce,1))) scaleX(var(--ces-stx,1)) scaleY(var(--ces-sty,1));transform-origin:50% 50%}
+.ces-inline[data-dragging='1']{--ces-press:.95}
+.ces-inline[data-motion='reduced'][data-dragging='1']{--ces-press:.975}
+@keyframes ces-knob-breathe{0%,100%{transform:translate3d(0,0,0) scale(1)}50%{transform:translate3d(1.2%,-0.8%,0) scale(1.03)}}
+.ces-inline[data-breath='1'] .ces-knob::after{animation:ces-knob-breathe 4.2s ease-in-out infinite}
+.ces-inline[data-motion='reduced'] .ces-knob::after{animation:none}
+.ces-error{margin-top:6px;font-size:11px;line-height:16px;color:var(--dsw-alias-state-error-primary,#e5484d)}
+.ces-inline[data-energy='1'] .ces-track{box-shadow:0 0 calc(var(--ces-energy,0) * 16px) rgba(168,85,247,.5)}
+.ces-inline[data-energy='0'] .ces-star,.ces-inline[data-energy='0'] .ces-energy__sweep{animation-play-state:paused}
+.ces-energy{position:absolute;top:0;bottom:0;left:0;right:0;overflow:hidden;pointer-events:none;opacity:var(--ces-energy,0);transition:opacity .2s ease;background:linear-gradient(90deg,#3b1178 0%,#6d28d9 30%,#9333ea 62%,#c084fc 100%)}
+.ces-stars{position:absolute;top:0;bottom:0;left:0;right:0;overflow:hidden;pointer-events:none;transition:opacity .2s ease}
+.ces-inline[data-dragging='1'] .ces-energy,.ces-inline[data-dragging='1'] .ces-stars{transition:none}
+.ces-star{position:absolute;left:0;right:0;height:3px;margin-top:-1.5px;pointer-events:none;animation-name:ces-star-sweep;animation-timing-function:linear;animation-iteration-count:infinite}
+.ces-star__dot{position:absolute;left:100%;top:0;width:3px;height:3px;margin-left:-1.5px;border-radius:50%;background:#fff;box-shadow:0 0 4px rgba(255,255,255,.85);opacity:var(--ces-b,1);transform:scale(var(--ces-b,1))}
+@keyframes ces-star-sweep{0%{transform:translate3d(0,0,0);opacity:0}6%{opacity:1}94%{opacity:1}100%{transform:translate3d(-100%,0,0);opacity:0}}
+.ces-energy__sweep{position:absolute;inset:0;background:linear-gradient(100deg,transparent 18%,rgba(255,255,255,.30) 50%,transparent 82%);transform:translateX(100%);animation:ces-sweep 2.4s linear infinite}
+@keyframes ces-sweep{0%{transform:translateX(100%)}100%{transform:translateX(-100%)}}
+body[data-ds-dark-theme] .ces-star__dot{background:#f5f3ff;box-shadow:0 0 5px rgba(216,180,254,.95)}
+@media (prefers-reduced-motion: reduce){.ces-energy{transition:none}.ces-energy__sweep{display:none}}
+</style>
+</head>
+<body>
+<h1>旋钮：液态玻璃珠子（材质 + 灵动 + 水感）</h1>
+<p class="sub">
+  这是 <b>iOS 26 式液态玻璃</b>，不是毛玻璃：<b>没有 <code>backdrop-filter</code></b>，珠子背后的填充、星尘、
+  轨道底色是<b>清晰</b>透出来的（毛玻璃会把它们糊掉）。玻璃感全部来自"光在曲面上"——
+  珠体只有 .03~.16 的白（几乎空的）、<code>::after</code> 一片大柔光加一枚<b>小亮斑</b>（那一滴镜面光，
+  位置随档位反向滑 = 滚珠感）、<code>::before</code> 底部一道透射光弧随能量变亮；
+  形状则由<b>内侧 1px 亮边 + 外侧极细暗发丝 + 两层软投影</b>撑住（浅色轨道上全靠这些）。
+  下面全是<b>真 CSS + 真几何</b>（抽自 <code>lib/client.js</code>），没有一处手绘。
+  <b>注意珠子压在填充边界上的那两张 6× 特写</b>：左半边透出档位色、右半边透出轨道灰，边界是锐的 —— 这就是液态玻璃。
+  最后两张卡片是<b>水感</b>与<b>灵动</b>：填充的液面贴着珠子的后缘走（<b>上限就是珠子右缘</b> ——
+  宽度里的 <code>min(0px, …)</code> 保证<b>水不会溢到珠子右边</b>；向后拖时珠子整颗泡在水里，
+  松手排水还回摆一下）、珠子拖得越快横向拉得越长、落档冲过刻度那一下会"叮"、光慢半拍地跟着晃 ——
+  那几个数字**同样是现算的**（<code>fillLeadTargetFor</code> / <code>knobStretchFor</code> / <code>knobBounceFor</code>）。
+</p>
+
+<div class="card">
+  <p class="cardTitle">四档 · 浅色主题（珠子随档位变亮/变深，高光也跟着滑）</p>
+  <div class="row"><span class="tag">Off</span><div class="ces-inline" data-energy="0" style="--ces-energy:0.0000;width:260px;--ces-fill-offset:0.0000;--ces-skew:0.000deg">
+    <div class="ces-track" role="slider">
+      <div class="ces-water" style="width:calc(calc(14px + 0 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1) + min(0px, var(--ces-fill-offset,0) * 14px))"><div class="ces-water-inner">
+        <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(77,147,248))"></div>
+        <div class="ces-energy"></div>
+        <div class="ces-stars" style="opacity:0.600"></div>
+      </div></div>
+      <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+      <div class="ces-knob" style="left:calc(14px + 0 * (100% - 28px));--ces-hl:36.0%"></div>
+    </div>
+  </div></div>
+  <div class="row"><span class="tag">Low</span><div class="ces-inline" data-energy="0" style="--ces-energy:0.0000;width:260px;--ces-fill-offset:0.0000;--ces-skew:0.000deg">
+    <div class="ces-track" role="slider">
+      <div class="ces-water" style="width:calc(calc(14px + 0.3333 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1) + min(0px, var(--ces-fill-offset,0) * 14px))"><div class="ces-water-inner">
+        <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(77,147,248))"></div>
+        <div class="ces-energy"></div>
+        <div class="ces-stars" style="opacity:0.600"></div>
+      </div></div>
+      <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+      <div class="ces-knob" style="left:calc(14px + 0.3333 * (100% - 28px));--ces-hl:32.0%"></div>
+    </div>
+  </div></div>
+  <div class="row"><span class="tag">High</span><div class="ces-inline" data-energy="1" style="--ces-energy:0.5000;width:260px;--ces-fill-offset:0.0000;--ces-skew:0.000deg">
+    <div class="ces-track" role="slider">
+      <div class="ces-water" style="width:calc(calc(14px + 0.6667 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1) + min(0px, var(--ces-fill-offset,0) * 14px))"><div class="ces-water-inner">
+        <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(147,51,234))"></div>
+        <div class="ces-energy"></div>
+        <div class="ces-stars" style="opacity:0.800"><span class="ces-star" style="top:52%;animation:none"><span class="ces-star__dot" style="left:61.8%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:84%;animation:none"><span class="ces-star__dot" style="left:23.6%;--ces-b:0.671;animation:none"></span></span><span class="ces-star" style="top:64%;animation:none"><span class="ces-star__dot" style="left:85.4%;--ces-b:0.703;animation:none"></span></span><span class="ces-star" style="top:16%;animation:none"><span class="ces-star__dot" style="left:47.2%;--ces-b:0.842;animation:none"></span></span><span class="ces-star" style="top:92%;animation:none"><span class="ces-star__dot" style="left:9.0%;--ces-b:0.873;animation:none"></span></span><span class="ces-star" style="top:44%;animation:none"><span class="ces-star__dot" style="left:70.8%;--ces-b:0.905;animation:none"></span></span><span class="ces-star" style="top:76%;animation:none"><span class="ces-star__dot" style="left:32.6%;--ces-b:0.545;animation:none"></span></span><span class="ces-star" style="top:56%;animation:none"><span class="ces-star__dot" style="left:94.4%;--ces-b:0.577;animation:none"></span></span><span class="ces-star" style="top:88%;animation:none"><span class="ces-star__dot" style="left:56.2%;--ces-b:0.608;animation:none"></span></span><span class="ces-star" style="top:40%;animation:none"><span class="ces-star__dot" style="left:18.0%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:36%;animation:none"><span class="ces-star__dot" style="left:79.8%;--ces-b:0.779;animation:none"></span></span></div>
+      </div></div>
+      <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+      <div class="ces-knob" style="left:calc(14px + 0.6667 * (100% - 28px));--ces-hl:28.0%"></div>
+    </div>
+  </div></div>
+  <div class="row"><span class="tag">Max</span><div class="ces-inline" data-energy="1" style="--ces-energy:1.0000;width:260px;--ces-fill-offset:0.0000;--ces-skew:0.000deg">
+    <div class="ces-track" role="slider">
+      <div class="ces-water" style="width:calc(calc(14px + 1 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1) + min(0px, var(--ces-fill-offset,0) * 14px))"><div class="ces-water-inner">
+        <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(76,29,149))"></div>
+        <div class="ces-energy"></div>
+        <div class="ces-stars" style="opacity:1.000"><span class="ces-star" style="top:52%;animation:none"><span class="ces-star__dot" style="left:61.8%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:84%;animation:none"><span class="ces-star__dot" style="left:23.6%;--ces-b:0.671;animation:none"></span></span><span class="ces-star" style="top:64%;animation:none"><span class="ces-star__dot" style="left:85.4%;--ces-b:0.703;animation:none"></span></span><span class="ces-star" style="top:16%;animation:none"><span class="ces-star__dot" style="left:47.2%;--ces-b:0.842;animation:none"></span></span><span class="ces-star" style="top:92%;animation:none"><span class="ces-star__dot" style="left:9.0%;--ces-b:0.873;animation:none"></span></span><span class="ces-star" style="top:44%;animation:none"><span class="ces-star__dot" style="left:70.8%;--ces-b:0.905;animation:none"></span></span><span class="ces-star" style="top:76%;animation:none"><span class="ces-star__dot" style="left:32.6%;--ces-b:0.545;animation:none"></span></span><span class="ces-star" style="top:56%;animation:none"><span class="ces-star__dot" style="left:94.4%;--ces-b:0.577;animation:none"></span></span><span class="ces-star" style="top:88%;animation:none"><span class="ces-star__dot" style="left:56.2%;--ces-b:0.608;animation:none"></span></span><span class="ces-star" style="top:40%;animation:none"><span class="ces-star__dot" style="left:18.0%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:36%;animation:none"><span class="ces-star__dot" style="left:79.8%;--ces-b:0.779;animation:none"></span></span><span class="ces-star" style="top:68%;animation:none"><span class="ces-star__dot" style="left:41.6%;--ces-b:0.811;animation:none"></span></span><span class="ces-star" style="top:48%;animation:none"><span class="ces-star__dot" style="left:3.4%;--ces-b:0.843;animation:none"></span></span><span class="ces-star" style="top:80%;animation:none"><span class="ces-star__dot" style="left:65.2%;--ces-b:0.982;animation:none"></span></span><span class="ces-star" style="top:32%;animation:none"><span class="ces-star__dot" style="left:27.1%;--ces-b:0.513;animation:none"></span></span><span class="ces-star" style="top:28%;animation:none"><span class="ces-star__dot" style="left:88.9%;--ces-b:0.545;animation:none"></span></span><span class="ces-star" style="top:60%;animation:none"><span class="ces-star__dot" style="left:50.7%;--ces-b:0.684;animation:none"></span></span><span class="ces-star" style="top:12%;animation:none"><span class="ces-star__dot" style="left:12.5%;--ces-b:0.717;animation:none"></span></span><span class="ces-star" style="top:72%;animation:none"><span class="ces-star__dot" style="left:74.3%;--ces-b:0.748;animation:none"></span></span><span class="ces-star" style="top:24%;animation:none"><span class="ces-star__dot" style="left:36.1%;--ces-b:0.780;animation:none"></span></span><span class="ces-star" style="top:20%;animation:none"><span class="ces-star__dot" style="left:97.9%;--ces-b:0.919;animation:none"></span></span><span class="ces-star" style="top:8%;animation:none"><span class="ces-star__dot" style="left:59.7%;--ces-b:0.951;animation:none"></span></span></div>
+      </div></div>
+      <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 1 * (100% - 28px))"></span>
+      <div class="ces-knob" style="left:calc(14px + 1 * (100% - 28px));--ces-hl:24.0%"></div>
+    </div>
+  </div></div>
+</div>
+
+<div class="card dark">
+  <p class="cardTitle">四档 · 深色主题（珠子在暗底上变成"烟熏玻璃"）</p>
+  <div class="row"><span class="tag">Off</span><div class="ces-inline" data-energy="0" style="--ces-energy:0.0000;width:260px;--ces-fill-offset:0.0000;--ces-skew:0.000deg">
+    <div class="ces-track" role="slider">
+      <div class="ces-water" style="width:calc(calc(14px + 0 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1) + min(0px, var(--ces-fill-offset,0) * 14px))"><div class="ces-water-inner">
+        <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(77,147,248))"></div>
+        <div class="ces-energy"></div>
+        <div class="ces-stars" style="opacity:0.600"></div>
+      </div></div>
+      <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+      <div class="ces-knob" style="left:calc(14px + 0 * (100% - 28px));--ces-hl:36.0%"></div>
+    </div>
+  </div></div>
+  <div class="row"><span class="tag">Low</span><div class="ces-inline" data-energy="0" style="--ces-energy:0.0000;width:260px;--ces-fill-offset:0.0000;--ces-skew:0.000deg">
+    <div class="ces-track" role="slider">
+      <div class="ces-water" style="width:calc(calc(14px + 0.3333 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1) + min(0px, var(--ces-fill-offset,0) * 14px))"><div class="ces-water-inner">
+        <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(77,147,248))"></div>
+        <div class="ces-energy"></div>
+        <div class="ces-stars" style="opacity:0.600"></div>
+      </div></div>
+      <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+      <div class="ces-knob" style="left:calc(14px + 0.3333 * (100% - 28px));--ces-hl:32.0%"></div>
+    </div>
+  </div></div>
+  <div class="row"><span class="tag">High</span><div class="ces-inline" data-energy="1" style="--ces-energy:0.5000;width:260px;--ces-fill-offset:0.0000;--ces-skew:0.000deg">
+    <div class="ces-track" role="slider">
+      <div class="ces-water" style="width:calc(calc(14px + 0.6667 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1) + min(0px, var(--ces-fill-offset,0) * 14px))"><div class="ces-water-inner">
+        <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(147,51,234))"></div>
+        <div class="ces-energy"></div>
+        <div class="ces-stars" style="opacity:0.800"><span class="ces-star" style="top:52%;animation:none"><span class="ces-star__dot" style="left:61.8%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:84%;animation:none"><span class="ces-star__dot" style="left:23.6%;--ces-b:0.671;animation:none"></span></span><span class="ces-star" style="top:64%;animation:none"><span class="ces-star__dot" style="left:85.4%;--ces-b:0.703;animation:none"></span></span><span class="ces-star" style="top:16%;animation:none"><span class="ces-star__dot" style="left:47.2%;--ces-b:0.842;animation:none"></span></span><span class="ces-star" style="top:92%;animation:none"><span class="ces-star__dot" style="left:9.0%;--ces-b:0.873;animation:none"></span></span><span class="ces-star" style="top:44%;animation:none"><span class="ces-star__dot" style="left:70.8%;--ces-b:0.905;animation:none"></span></span><span class="ces-star" style="top:76%;animation:none"><span class="ces-star__dot" style="left:32.6%;--ces-b:0.545;animation:none"></span></span><span class="ces-star" style="top:56%;animation:none"><span class="ces-star__dot" style="left:94.4%;--ces-b:0.577;animation:none"></span></span><span class="ces-star" style="top:88%;animation:none"><span class="ces-star__dot" style="left:56.2%;--ces-b:0.608;animation:none"></span></span><span class="ces-star" style="top:40%;animation:none"><span class="ces-star__dot" style="left:18.0%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:36%;animation:none"><span class="ces-star__dot" style="left:79.8%;--ces-b:0.779;animation:none"></span></span></div>
+      </div></div>
+      <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+      <div class="ces-knob" style="left:calc(14px + 0.6667 * (100% - 28px));--ces-hl:28.0%"></div>
+    </div>
+  </div></div>
+  <div class="row"><span class="tag">Max</span><div class="ces-inline" data-energy="1" style="--ces-energy:1.0000;width:260px;--ces-fill-offset:0.0000;--ces-skew:0.000deg">
+    <div class="ces-track" role="slider">
+      <div class="ces-water" style="width:calc(calc(14px + 1 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1) + min(0px, var(--ces-fill-offset,0) * 14px))"><div class="ces-water-inner">
+        <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(76,29,149))"></div>
+        <div class="ces-energy"></div>
+        <div class="ces-stars" style="opacity:1.000"><span class="ces-star" style="top:52%;animation:none"><span class="ces-star__dot" style="left:61.8%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:84%;animation:none"><span class="ces-star__dot" style="left:23.6%;--ces-b:0.671;animation:none"></span></span><span class="ces-star" style="top:64%;animation:none"><span class="ces-star__dot" style="left:85.4%;--ces-b:0.703;animation:none"></span></span><span class="ces-star" style="top:16%;animation:none"><span class="ces-star__dot" style="left:47.2%;--ces-b:0.842;animation:none"></span></span><span class="ces-star" style="top:92%;animation:none"><span class="ces-star__dot" style="left:9.0%;--ces-b:0.873;animation:none"></span></span><span class="ces-star" style="top:44%;animation:none"><span class="ces-star__dot" style="left:70.8%;--ces-b:0.905;animation:none"></span></span><span class="ces-star" style="top:76%;animation:none"><span class="ces-star__dot" style="left:32.6%;--ces-b:0.545;animation:none"></span></span><span class="ces-star" style="top:56%;animation:none"><span class="ces-star__dot" style="left:94.4%;--ces-b:0.577;animation:none"></span></span><span class="ces-star" style="top:88%;animation:none"><span class="ces-star__dot" style="left:56.2%;--ces-b:0.608;animation:none"></span></span><span class="ces-star" style="top:40%;animation:none"><span class="ces-star__dot" style="left:18.0%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:36%;animation:none"><span class="ces-star__dot" style="left:79.8%;--ces-b:0.779;animation:none"></span></span><span class="ces-star" style="top:68%;animation:none"><span class="ces-star__dot" style="left:41.6%;--ces-b:0.811;animation:none"></span></span><span class="ces-star" style="top:48%;animation:none"><span class="ces-star__dot" style="left:3.4%;--ces-b:0.843;animation:none"></span></span><span class="ces-star" style="top:80%;animation:none"><span class="ces-star__dot" style="left:65.2%;--ces-b:0.982;animation:none"></span></span><span class="ces-star" style="top:32%;animation:none"><span class="ces-star__dot" style="left:27.1%;--ces-b:0.513;animation:none"></span></span><span class="ces-star" style="top:28%;animation:none"><span class="ces-star__dot" style="left:88.9%;--ces-b:0.545;animation:none"></span></span><span class="ces-star" style="top:60%;animation:none"><span class="ces-star__dot" style="left:50.7%;--ces-b:0.684;animation:none"></span></span><span class="ces-star" style="top:12%;animation:none"><span class="ces-star__dot" style="left:12.5%;--ces-b:0.717;animation:none"></span></span><span class="ces-star" style="top:72%;animation:none"><span class="ces-star__dot" style="left:74.3%;--ces-b:0.748;animation:none"></span></span><span class="ces-star" style="top:24%;animation:none"><span class="ces-star__dot" style="left:36.1%;--ces-b:0.780;animation:none"></span></span><span class="ces-star" style="top:20%;animation:none"><span class="ces-star__dot" style="left:97.9%;--ces-b:0.919;animation:none"></span></span><span class="ces-star" style="top:8%;animation:none"><span class="ces-star__dot" style="left:59.7%;--ces-b:0.951;animation:none"></span></span></div>
+      </div></div>
+      <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 1 * (100% - 28px))"></span>
+      <div class="ces-knob" style="left:calc(14px + 1 * (100% - 28px));--ces-hl:24.0%"></div>
+    </div>
+  </div></div>
+</div>
+
+<div class="card">
+  <p class="cardTitle">6× 特写：珠子正好压在「已填充 / 未填充」的交界上</p>
+  <div class="closeups">
+    <div class="closeup" style="width:620px;height:208px">
+    <div class="closeupInner" style="left:-238.0px;top:20px;transform:scale(6);transform-origin:0 0;width:260px">
+      <div class="ces-inline" data-energy="0" style="--ces-energy:0.0000;width:260px;--ces-fill-offset:0.0000;--ces-skew:0.000deg">
+    <div class="ces-track" role="slider">
+      <div class="ces-water" style="width:calc(calc(14px + 0.3333 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1) + min(0px, var(--ces-fill-offset,0) * 14px))"><div class="ces-water-inner">
+        <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(77,147,248))"></div>
+        <div class="ces-energy"></div>
+        <div class="ces-stars" style="opacity:0.600"></div>
+      </div></div>
+      <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+      <div class="ces-knob" style="left:calc(14px + 0.3333 * (100% - 28px));--ces-hl:32.0%"></div>
+    </div>
+  </div>
+    </div>
+    <div class="closeupNote">6× · Low</div>
+  </div>
+    <div class="closeup" style="width:620px;height:208px">
+    <div class="closeupInner" style="left:-702.0px;top:20px;transform:scale(6);transform-origin:0 0;width:260px">
+      <div class="ces-inline" data-energy="1" style="--ces-energy:0.5000;width:260px;--ces-fill-offset:0.0000;--ces-skew:0.000deg">
+    <div class="ces-track" role="slider">
+      <div class="ces-water" style="width:calc(calc(14px + 0.6667 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1) + min(0px, var(--ces-fill-offset,0) * 14px))"><div class="ces-water-inner">
+        <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(147,51,234))"></div>
+        <div class="ces-energy"></div>
+        <div class="ces-stars" style="opacity:0.800"><span class="ces-star" style="top:52%;animation:none"><span class="ces-star__dot" style="left:61.8%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:84%;animation:none"><span class="ces-star__dot" style="left:23.6%;--ces-b:0.671;animation:none"></span></span><span class="ces-star" style="top:64%;animation:none"><span class="ces-star__dot" style="left:85.4%;--ces-b:0.703;animation:none"></span></span><span class="ces-star" style="top:16%;animation:none"><span class="ces-star__dot" style="left:47.2%;--ces-b:0.842;animation:none"></span></span><span class="ces-star" style="top:92%;animation:none"><span class="ces-star__dot" style="left:9.0%;--ces-b:0.873;animation:none"></span></span><span class="ces-star" style="top:44%;animation:none"><span class="ces-star__dot" style="left:70.8%;--ces-b:0.905;animation:none"></span></span><span class="ces-star" style="top:76%;animation:none"><span class="ces-star__dot" style="left:32.6%;--ces-b:0.545;animation:none"></span></span><span class="ces-star" style="top:56%;animation:none"><span class="ces-star__dot" style="left:94.4%;--ces-b:0.577;animation:none"></span></span><span class="ces-star" style="top:88%;animation:none"><span class="ces-star__dot" style="left:56.2%;--ces-b:0.608;animation:none"></span></span><span class="ces-star" style="top:40%;animation:none"><span class="ces-star__dot" style="left:18.0%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:36%;animation:none"><span class="ces-star__dot" style="left:79.8%;--ces-b:0.779;animation:none"></span></span></div>
+      </div></div>
+      <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+      <div class="ces-knob" style="left:calc(14px + 0.6667 * (100% - 28px));--ces-hl:28.0%"></div>
+    </div>
+  </div>
+    </div>
+    <div class="closeupNote">6× · High</div>
+  </div>
+  </div>
+</div>
+
+<div class="card">
+  <p class="cardTitle">高低落差：水面会斜（按**真实拖动速度**现算，3× 对准珠子）</p>
+  <div class="row"><span class="tag">静止</span>
+    <div class="closeup" style="width:300px;height:104px">
+      <div class="closeupInner" style="left:-356.0px;top:10px;transform:scale(3);transform-origin:0 0;width:260px">
+        <div class="ces-inline" data-energy="1" style="--ces-energy:0.5000;width:260px;--ces-fill-offset:0.0000;--ces-skew:0.000deg">
+    <div class="ces-track" role="slider">
+      <div class="ces-water" style="width:calc(calc(14px + 0.6667 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1) + min(0px, var(--ces-fill-offset,0) * 14px))"><div class="ces-water-inner">
+        <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(147,51,234))"></div>
+        <div class="ces-energy"></div>
+        <div class="ces-stars" style="opacity:0.800"><span class="ces-star" style="top:52%;animation:none"><span class="ces-star__dot" style="left:61.8%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:84%;animation:none"><span class="ces-star__dot" style="left:23.6%;--ces-b:0.671;animation:none"></span></span><span class="ces-star" style="top:64%;animation:none"><span class="ces-star__dot" style="left:85.4%;--ces-b:0.703;animation:none"></span></span><span class="ces-star" style="top:16%;animation:none"><span class="ces-star__dot" style="left:47.2%;--ces-b:0.842;animation:none"></span></span><span class="ces-star" style="top:92%;animation:none"><span class="ces-star__dot" style="left:9.0%;--ces-b:0.873;animation:none"></span></span><span class="ces-star" style="top:44%;animation:none"><span class="ces-star__dot" style="left:70.8%;--ces-b:0.905;animation:none"></span></span><span class="ces-star" style="top:76%;animation:none"><span class="ces-star__dot" style="left:32.6%;--ces-b:0.545;animation:none"></span></span><span class="ces-star" style="top:56%;animation:none"><span class="ces-star__dot" style="left:94.4%;--ces-b:0.577;animation:none"></span></span><span class="ces-star" style="top:88%;animation:none"><span class="ces-star__dot" style="left:56.2%;--ces-b:0.608;animation:none"></span></span><span class="ces-star" style="top:40%;animation:none"><span class="ces-star__dot" style="left:18.0%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:36%;animation:none"><span class="ces-star__dot" style="left:79.8%;--ces-b:0.779;animation:none"></span></span></div>
+      </div></div>
+      <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+      <div class="ces-knob" style="left:calc(14px + 0.6667 * (100% - 28px));--ces-hl:28.0%"></div>
+    </div>
+  </div>
+      </div>
+    </div>
+    <span class="detail">静止：倾角 0 → 水面是**水平的**，且水面在珠子右缘（珠子泡在水里）</span></div>
+  <div class="row"><span class="tag">向左拖</span>
+    <div class="closeup" style="width:300px;height:104px">
+      <div class="closeupInner" style="left:-356.0px;top:10px;transform:scale(3);transform-origin:0 0;width:260px">
+        <div class="ces-inline" data-energy="1" style="--ces-energy:0.5000;width:260px;--ces-fill-offset:0.9576;--ces-skew:-3.256deg">
+    <div class="ces-track" role="slider">
+      <div class="ces-water" style="width:calc(calc(14px + 0.6667 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1) + min(0px, var(--ces-fill-offset,0) * 14px))"><div class="ces-water-inner">
+        <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(147,51,234))"></div>
+        <div class="ces-energy"></div>
+        <div class="ces-stars" style="opacity:0.800"><span class="ces-star" style="top:52%;animation:none"><span class="ces-star__dot" style="left:61.8%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:84%;animation:none"><span class="ces-star__dot" style="left:23.6%;--ces-b:0.671;animation:none"></span></span><span class="ces-star" style="top:64%;animation:none"><span class="ces-star__dot" style="left:85.4%;--ces-b:0.703;animation:none"></span></span><span class="ces-star" style="top:16%;animation:none"><span class="ces-star__dot" style="left:47.2%;--ces-b:0.842;animation:none"></span></span><span class="ces-star" style="top:92%;animation:none"><span class="ces-star__dot" style="left:9.0%;--ces-b:0.873;animation:none"></span></span><span class="ces-star" style="top:44%;animation:none"><span class="ces-star__dot" style="left:70.8%;--ces-b:0.905;animation:none"></span></span><span class="ces-star" style="top:76%;animation:none"><span class="ces-star__dot" style="left:32.6%;--ces-b:0.545;animation:none"></span></span><span class="ces-star" style="top:56%;animation:none"><span class="ces-star__dot" style="left:94.4%;--ces-b:0.577;animation:none"></span></span><span class="ces-star" style="top:88%;animation:none"><span class="ces-star__dot" style="left:56.2%;--ces-b:0.608;animation:none"></span></span><span class="ces-star" style="top:40%;animation:none"><span class="ces-star__dot" style="left:18.0%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:36%;animation:none"><span class="ces-star__dot" style="left:79.8%;--ces-b:0.779;animation:none"></span></span></div>
+      </div></div>
+      <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+      <div class="ces-knob" style="left:calc(14px + 0.6667 * (100% - 28px));--ces-hl:28.0%"></div>
+    </div>
+  </div>
+      </div>
+    </div>
+    <span class="detail">拖 -400px/秒（= -1.72 pct/秒）→ 倾角 -3.26° ≈ 13.2px 高差（**右端抬起**：水在珠子后侧堆起来）</span></div>
+  <div class="row"><span class="tag">向右拖</span>
+    <div class="closeup" style="width:300px;height:104px">
+      <div class="closeupInner" style="left:-356.0px;top:10px;transform:scale(3);transform-origin:0 0;width:260px">
+        <div class="ces-inline" data-energy="1" style="--ces-energy:0.5000;width:260px;--ces-fill-offset:-0.9576;--ces-skew:3.256deg">
+    <div class="ces-track" role="slider">
+      <div class="ces-water" style="width:calc(calc(14px + 0.6667 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1) + min(0px, var(--ces-fill-offset,0) * 14px))"><div class="ces-water-inner">
+        <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(147,51,234))"></div>
+        <div class="ces-energy"></div>
+        <div class="ces-stars" style="opacity:0.800"><span class="ces-star" style="top:52%;animation:none"><span class="ces-star__dot" style="left:61.8%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:84%;animation:none"><span class="ces-star__dot" style="left:23.6%;--ces-b:0.671;animation:none"></span></span><span class="ces-star" style="top:64%;animation:none"><span class="ces-star__dot" style="left:85.4%;--ces-b:0.703;animation:none"></span></span><span class="ces-star" style="top:16%;animation:none"><span class="ces-star__dot" style="left:47.2%;--ces-b:0.842;animation:none"></span></span><span class="ces-star" style="top:92%;animation:none"><span class="ces-star__dot" style="left:9.0%;--ces-b:0.873;animation:none"></span></span><span class="ces-star" style="top:44%;animation:none"><span class="ces-star__dot" style="left:70.8%;--ces-b:0.905;animation:none"></span></span><span class="ces-star" style="top:76%;animation:none"><span class="ces-star__dot" style="left:32.6%;--ces-b:0.545;animation:none"></span></span><span class="ces-star" style="top:56%;animation:none"><span class="ces-star__dot" style="left:94.4%;--ces-b:0.577;animation:none"></span></span><span class="ces-star" style="top:88%;animation:none"><span class="ces-star__dot" style="left:56.2%;--ces-b:0.608;animation:none"></span></span><span class="ces-star" style="top:40%;animation:none"><span class="ces-star__dot" style="left:18.0%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:36%;animation:none"><span class="ces-star__dot" style="left:79.8%;--ces-b:0.779;animation:none"></span></span></div>
+      </div></div>
+      <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+      <div class="ces-knob" style="left:calc(14px + 0.6667 * (100% - 28px));--ces-hl:28.0%"></div>
+    </div>
+  </div>
+      </div>
+    </div>
+    <span class="detail">拖 400px/秒（= 1.72 pct/秒）→ 倾角 3.26° ≈ 13.2px 高差（**右端压下**：水面被推着往前追）</span></div>
+  <div class="row"><span class="tag">荡波中途</span>
+    <div class="closeup" style="width:300px;height:104px">
+      <div class="closeupInner" style="left:-356.0px;top:10px;transform:scale(3);transform-origin:0 0;width:260px">
+        <div class="ces-inline" data-energy="1" style="--ces-energy:0.5000;width:260px;--ces-fill-offset:0.2000;--ces-skew:-3.400deg">
+    <div class="ces-track" role="slider">
+      <div class="ces-water" style="width:calc(calc(14px + 0.6667 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1) + min(0px, var(--ces-fill-offset,0) * 14px))"><div class="ces-water-inner">
+        <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(147,51,234))"></div>
+        <div class="ces-energy"></div>
+        <div class="ces-stars" style="opacity:0.800"><span class="ces-star" style="top:52%;animation:none"><span class="ces-star__dot" style="left:61.8%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:84%;animation:none"><span class="ces-star__dot" style="left:23.6%;--ces-b:0.671;animation:none"></span></span><span class="ces-star" style="top:64%;animation:none"><span class="ces-star__dot" style="left:85.4%;--ces-b:0.703;animation:none"></span></span><span class="ces-star" style="top:16%;animation:none"><span class="ces-star__dot" style="left:47.2%;--ces-b:0.842;animation:none"></span></span><span class="ces-star" style="top:92%;animation:none"><span class="ces-star__dot" style="left:9.0%;--ces-b:0.873;animation:none"></span></span><span class="ces-star" style="top:44%;animation:none"><span class="ces-star__dot" style="left:70.8%;--ces-b:0.905;animation:none"></span></span><span class="ces-star" style="top:76%;animation:none"><span class="ces-star__dot" style="left:32.6%;--ces-b:0.545;animation:none"></span></span><span class="ces-star" style="top:56%;animation:none"><span class="ces-star__dot" style="left:94.4%;--ces-b:0.577;animation:none"></span></span><span class="ces-star" style="top:88%;animation:none"><span class="ces-star__dot" style="left:56.2%;--ces-b:0.608;animation:none"></span></span><span class="ces-star" style="top:40%;animation:none"><span class="ces-star__dot" style="left:18.0%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:36%;animation:none"><span class="ces-star__dot" style="left:79.8%;--ces-b:0.779;animation:none"></span></span></div>
+      </div></div>
+      <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+      <div class="ces-knob" style="left:calc(14px + 0.6667 * (100% - 28px));--ces-hl:28.0%"></div>
+    </div>
+  </div>
+      </div>
+    </div>
+    <span class="detail">荡波中途的一帧：水面还斜着 -3.40°（≈ 13.8px，反方向荡回来）</span></div>
+</div>
+
+<div class="card">
+  <p class="cardTitle">水感：填充的液面贴着珠子的后缘走（按**真实拖动速度**现算，3× 对准珠子）</p>
+  <div class="row"><span class="tag">静止</span>
+    <div class="closeup" style="width:300px;height:104px">
+      <div class="closeupInner" style="left:-356.0px;top:10px;transform:scale(3);transform-origin:0 0;width:260px">
+        <div class="ces-inline" data-energy="1" style="--ces-energy:0.5000;width:260px;--ces-fill-offset:0.0000;--ces-skew:0.000deg">
+    <div class="ces-track" role="slider">
+      <div class="ces-water" style="width:calc(calc(14px + 0.6667 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1) + min(0px, var(--ces-fill-offset,0) * 14px))"><div class="ces-water-inner">
+        <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(147,51,234))"></div>
+        <div class="ces-energy"></div>
+        <div class="ces-stars" style="opacity:0.800"><span class="ces-star" style="top:52%;animation:none"><span class="ces-star__dot" style="left:61.8%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:84%;animation:none"><span class="ces-star__dot" style="left:23.6%;--ces-b:0.671;animation:none"></span></span><span class="ces-star" style="top:64%;animation:none"><span class="ces-star__dot" style="left:85.4%;--ces-b:0.703;animation:none"></span></span><span class="ces-star" style="top:16%;animation:none"><span class="ces-star__dot" style="left:47.2%;--ces-b:0.842;animation:none"></span></span><span class="ces-star" style="top:92%;animation:none"><span class="ces-star__dot" style="left:9.0%;--ces-b:0.873;animation:none"></span></span><span class="ces-star" style="top:44%;animation:none"><span class="ces-star__dot" style="left:70.8%;--ces-b:0.905;animation:none"></span></span><span class="ces-star" style="top:76%;animation:none"><span class="ces-star__dot" style="left:32.6%;--ces-b:0.545;animation:none"></span></span><span class="ces-star" style="top:56%;animation:none"><span class="ces-star__dot" style="left:94.4%;--ces-b:0.577;animation:none"></span></span><span class="ces-star" style="top:88%;animation:none"><span class="ces-star__dot" style="left:56.2%;--ces-b:0.608;animation:none"></span></span><span class="ces-star" style="top:40%;animation:none"><span class="ces-star__dot" style="left:18.0%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:36%;animation:none"><span class="ces-star__dot" style="left:79.8%;--ces-b:0.779;animation:none"></span></span></div>
+      </div></div>
+      <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+      <div class="ces-knob" style="left:calc(14px + 0.6667 * (100% - 28px));--ces-hl:28.0%"></div>
+    </div>
+  </div>
+      </div>
+    </div>
+    <span class="detail">偏移 0 → 液面正好在珠子**圆心**（静止态，与旧版逐像素一致）</span></div>
+  <div class="row"><span class="tag">慢慢拖</span>
+    <div class="closeup" style="width:300px;height:104px">
+      <div class="closeupInner" style="left:-356.0px;top:10px;transform:scale(3);transform-origin:0 0;width:260px">
+        <div class="ces-inline" data-energy="1" style="--ces-energy:0.5000;width:260px;--ces-fill-offset:-0.4454;--ces-skew:0.000deg">
+    <div class="ces-track" role="slider">
+      <div class="ces-water" style="width:calc(calc(14px + 0.6667 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1) + min(0px, var(--ces-fill-offset,0) * 14px))"><div class="ces-water-inner">
+        <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(147,51,234))"></div>
+        <div class="ces-energy"></div>
+        <div class="ces-stars" style="opacity:0.800"><span class="ces-star" style="top:52%;animation:none"><span class="ces-star__dot" style="left:61.8%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:84%;animation:none"><span class="ces-star__dot" style="left:23.6%;--ces-b:0.671;animation:none"></span></span><span class="ces-star" style="top:64%;animation:none"><span class="ces-star__dot" style="left:85.4%;--ces-b:0.703;animation:none"></span></span><span class="ces-star" style="top:16%;animation:none"><span class="ces-star__dot" style="left:47.2%;--ces-b:0.842;animation:none"></span></span><span class="ces-star" style="top:92%;animation:none"><span class="ces-star__dot" style="left:9.0%;--ces-b:0.873;animation:none"></span></span><span class="ces-star" style="top:44%;animation:none"><span class="ces-star__dot" style="left:70.8%;--ces-b:0.905;animation:none"></span></span><span class="ces-star" style="top:76%;animation:none"><span class="ces-star__dot" style="left:32.6%;--ces-b:0.545;animation:none"></span></span><span class="ces-star" style="top:56%;animation:none"><span class="ces-star__dot" style="left:94.4%;--ces-b:0.577;animation:none"></span></span><span class="ces-star" style="top:88%;animation:none"><span class="ces-star__dot" style="left:56.2%;--ces-b:0.608;animation:none"></span></span><span class="ces-star" style="top:40%;animation:none"><span class="ces-star__dot" style="left:18.0%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:36%;animation:none"><span class="ces-star__dot" style="left:79.8%;--ces-b:0.779;animation:none"></span></span></div>
+      </div></div>
+      <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+      <div class="ces-knob" style="left:calc(14px + 0.6667 * (100% - 28px));--ces-hl:28.0%"></div>
+    </div>
+  </div>
+      </div>
+    </div>
+    <span class="detail">拖 100px/秒 → 偏移 -0.445 ≈ 6.2px（液面贴到珠子**左缘**方向 = 珠子领着水走）</span></div>
+  <div class="row"><span class="tag">正常拖</span>
+    <div class="closeup" style="width:300px;height:104px">
+      <div class="closeupInner" style="left:-356.0px;top:10px;transform:scale(3);transform-origin:0 0;width:260px">
+        <div class="ces-inline" data-energy="1" style="--ces-energy:0.5000;width:260px;--ces-fill-offset:-0.9576;--ces-skew:0.000deg">
+    <div class="ces-track" role="slider">
+      <div class="ces-water" style="width:calc(calc(14px + 0.6667 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1) + min(0px, var(--ces-fill-offset,0) * 14px))"><div class="ces-water-inner">
+        <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(147,51,234))"></div>
+        <div class="ces-energy"></div>
+        <div class="ces-stars" style="opacity:0.800"><span class="ces-star" style="top:52%;animation:none"><span class="ces-star__dot" style="left:61.8%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:84%;animation:none"><span class="ces-star__dot" style="left:23.6%;--ces-b:0.671;animation:none"></span></span><span class="ces-star" style="top:64%;animation:none"><span class="ces-star__dot" style="left:85.4%;--ces-b:0.703;animation:none"></span></span><span class="ces-star" style="top:16%;animation:none"><span class="ces-star__dot" style="left:47.2%;--ces-b:0.842;animation:none"></span></span><span class="ces-star" style="top:92%;animation:none"><span class="ces-star__dot" style="left:9.0%;--ces-b:0.873;animation:none"></span></span><span class="ces-star" style="top:44%;animation:none"><span class="ces-star__dot" style="left:70.8%;--ces-b:0.905;animation:none"></span></span><span class="ces-star" style="top:76%;animation:none"><span class="ces-star__dot" style="left:32.6%;--ces-b:0.545;animation:none"></span></span><span class="ces-star" style="top:56%;animation:none"><span class="ces-star__dot" style="left:94.4%;--ces-b:0.577;animation:none"></span></span><span class="ces-star" style="top:88%;animation:none"><span class="ces-star__dot" style="left:56.2%;--ces-b:0.608;animation:none"></span></span><span class="ces-star" style="top:40%;animation:none"><span class="ces-star__dot" style="left:18.0%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:36%;animation:none"><span class="ces-star__dot" style="left:79.8%;--ces-b:0.779;animation:none"></span></span></div>
+      </div></div>
+      <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+      <div class="ces-knob" style="left:calc(14px + 0.6667 * (100% - 28px));--ces-hl:28.0%"></div>
+    </div>
+  </div>
+      </div>
+    </div>
+    <span class="detail">拖 400px/秒 → 偏移 -0.958 ≈ 13.4px（液面贴到珠子**左缘**方向 = 珠子领着水走）</span></div>
+  <div class="row"><span class="tag">快拖</span>
+    <div class="closeup" style="width:300px;height:104px">
+      <div class="closeupInner" style="left:-356.0px;top:10px;transform:scale(3);transform-origin:0 0;width:260px">
+        <div class="ces-inline" data-energy="1" style="--ces-energy:0.5000;width:260px;--ces-fill-offset:-0.9996;--ces-skew:0.000deg">
+    <div class="ces-track" role="slider">
+      <div class="ces-water" style="width:calc(calc(14px + 0.6667 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1) + min(0px, var(--ces-fill-offset,0) * 14px))"><div class="ces-water-inner">
+        <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(147,51,234))"></div>
+        <div class="ces-energy"></div>
+        <div class="ces-stars" style="opacity:0.800"><span class="ces-star" style="top:52%;animation:none"><span class="ces-star__dot" style="left:61.8%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:84%;animation:none"><span class="ces-star__dot" style="left:23.6%;--ces-b:0.671;animation:none"></span></span><span class="ces-star" style="top:64%;animation:none"><span class="ces-star__dot" style="left:85.4%;--ces-b:0.703;animation:none"></span></span><span class="ces-star" style="top:16%;animation:none"><span class="ces-star__dot" style="left:47.2%;--ces-b:0.842;animation:none"></span></span><span class="ces-star" style="top:92%;animation:none"><span class="ces-star__dot" style="left:9.0%;--ces-b:0.873;animation:none"></span></span><span class="ces-star" style="top:44%;animation:none"><span class="ces-star__dot" style="left:70.8%;--ces-b:0.905;animation:none"></span></span><span class="ces-star" style="top:76%;animation:none"><span class="ces-star__dot" style="left:32.6%;--ces-b:0.545;animation:none"></span></span><span class="ces-star" style="top:56%;animation:none"><span class="ces-star__dot" style="left:94.4%;--ces-b:0.577;animation:none"></span></span><span class="ces-star" style="top:88%;animation:none"><span class="ces-star__dot" style="left:56.2%;--ces-b:0.608;animation:none"></span></span><span class="ces-star" style="top:40%;animation:none"><span class="ces-star__dot" style="left:18.0%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:36%;animation:none"><span class="ces-star__dot" style="left:79.8%;--ces-b:0.779;animation:none"></span></span></div>
+      </div></div>
+      <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+      <div class="ces-knob" style="left:calc(14px + 0.6667 * (100% - 28px));--ces-hl:28.0%"></div>
+    </div>
+  </div>
+      </div>
+    </div>
+    <span class="detail">拖 900px/秒 → 偏移 -1.000 ≈ 14.0px（液面贴到珠子**左缘**方向 = 珠子领着水走）</span></div>
+  <div class="row"><span class="tag">排水回摆</span>
+    <div class="closeup" style="width:300px;height:104px">
+      <div class="closeupInner" style="left:-356.0px;top:10px;transform:scale(3);transform-origin:0 0;width:260px">
+        <div class="ces-inline" data-energy="1" style="--ces-energy:0.5000;width:260px;--ces-fill-offset:-0.0500;--ces-skew:0.000deg">
+    <div class="ces-track" role="slider">
+      <div class="ces-water" style="width:calc(calc(14px + 0.6667 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1) + min(0px, var(--ces-fill-offset,0) * 14px))"><div class="ces-water-inner">
+        <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(147,51,234))"></div>
+        <div class="ces-energy"></div>
+        <div class="ces-stars" style="opacity:0.800"><span class="ces-star" style="top:52%;animation:none"><span class="ces-star__dot" style="left:61.8%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:84%;animation:none"><span class="ces-star__dot" style="left:23.6%;--ces-b:0.671;animation:none"></span></span><span class="ces-star" style="top:64%;animation:none"><span class="ces-star__dot" style="left:85.4%;--ces-b:0.703;animation:none"></span></span><span class="ces-star" style="top:16%;animation:none"><span class="ces-star__dot" style="left:47.2%;--ces-b:0.842;animation:none"></span></span><span class="ces-star" style="top:92%;animation:none"><span class="ces-star__dot" style="left:9.0%;--ces-b:0.873;animation:none"></span></span><span class="ces-star" style="top:44%;animation:none"><span class="ces-star__dot" style="left:70.8%;--ces-b:0.905;animation:none"></span></span><span class="ces-star" style="top:76%;animation:none"><span class="ces-star__dot" style="left:32.6%;--ces-b:0.545;animation:none"></span></span><span class="ces-star" style="top:56%;animation:none"><span class="ces-star__dot" style="left:94.4%;--ces-b:0.577;animation:none"></span></span><span class="ces-star" style="top:88%;animation:none"><span class="ces-star__dot" style="left:56.2%;--ces-b:0.608;animation:none"></span></span><span class="ces-star" style="top:40%;animation:none"><span class="ces-star__dot" style="left:18.0%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:36%;animation:none"><span class="ces-star__dot" style="left:79.8%;--ces-b:0.779;animation:none"></span></span></div>
+      </div></div>
+      <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+      <div class="ces-knob" style="left:calc(14px + 0.6667 * (100% - 28px));--ces-hl:28.0%"></div>
+    </div>
+  </div>
+      </div>
+    </div>
+    <span class="detail">排水回摆：松手后液面排回 0，过冲那一下到了 -0.050（这一帧就是过冲瞬间；正向偏移已被 min(0px,…) 夹在珠子右缘，所以只能往珠子内侧摆）</span></div>
+</div>
+
+<div class="card">
+  <p class="cardTitle">灵动：同样的珠子，一动起来就变形（按**真实拖动速度**现算）</p>
+  <div class="row"><span class="tag">静止</span><div class="ces-inline" data-energy="1" style="--ces-energy:0.5000;width:260px;--ces-fill-offset:0.0000;--ces-skew:0.000deg;--ces-stx:1.0000;--ces-sty:1.0000;--ces-bounce:1.0000;--ces-press:1">
+    <div class="ces-track" role="slider">
+      <div class="ces-water" style="width:calc(calc(14px + 0.6667 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1) + min(0px, var(--ces-fill-offset,0) * 14px))"><div class="ces-water-inner">
+        <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(147,51,234))"></div>
+        <div class="ces-energy"></div>
+        <div class="ces-stars" style="opacity:0.800"><span class="ces-star" style="top:52%;animation:none"><span class="ces-star__dot" style="left:61.8%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:84%;animation:none"><span class="ces-star__dot" style="left:23.6%;--ces-b:0.671;animation:none"></span></span><span class="ces-star" style="top:64%;animation:none"><span class="ces-star__dot" style="left:85.4%;--ces-b:0.703;animation:none"></span></span><span class="ces-star" style="top:16%;animation:none"><span class="ces-star__dot" style="left:47.2%;--ces-b:0.842;animation:none"></span></span><span class="ces-star" style="top:92%;animation:none"><span class="ces-star__dot" style="left:9.0%;--ces-b:0.873;animation:none"></span></span><span class="ces-star" style="top:44%;animation:none"><span class="ces-star__dot" style="left:70.8%;--ces-b:0.905;animation:none"></span></span><span class="ces-star" style="top:76%;animation:none"><span class="ces-star__dot" style="left:32.6%;--ces-b:0.545;animation:none"></span></span><span class="ces-star" style="top:56%;animation:none"><span class="ces-star__dot" style="left:94.4%;--ces-b:0.577;animation:none"></span></span><span class="ces-star" style="top:88%;animation:none"><span class="ces-star__dot" style="left:56.2%;--ces-b:0.608;animation:none"></span></span><span class="ces-star" style="top:40%;animation:none"><span class="ces-star__dot" style="left:18.0%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:36%;animation:none"><span class="ces-star__dot" style="left:79.8%;--ces-b:0.779;animation:none"></span></span></div>
+      </div></div>
+      <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+      <div class="ces-knob" style="left:calc(14px + 0.6667 * (100% - 28px));--ces-hl:28.0%"></div>
+    </div>
+  </div><span class="detail">速度 0 → 横向 ×1.0000、纵向 ×1.0000（完美的圆）</span></div>
+  <div class="row"><span class="tag">正常拖</span><div class="ces-inline" data-energy="1" style="--ces-energy:0.5000;width:260px;--ces-fill-offset:0.0000;--ces-skew:0.000deg;--ces-stx:1.0915;--ces-sty:0.9162;--ces-bounce:1.0000;--ces-press:1">
+    <div class="ces-track" role="slider">
+      <div class="ces-water" style="width:calc(calc(14px + 0.6667 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1) + min(0px, var(--ces-fill-offset,0) * 14px))"><div class="ces-water-inner">
+        <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(147,51,234))"></div>
+        <div class="ces-energy"></div>
+        <div class="ces-stars" style="opacity:0.800"><span class="ces-star" style="top:52%;animation:none"><span class="ces-star__dot" style="left:61.8%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:84%;animation:none"><span class="ces-star__dot" style="left:23.6%;--ces-b:0.671;animation:none"></span></span><span class="ces-star" style="top:64%;animation:none"><span class="ces-star__dot" style="left:85.4%;--ces-b:0.703;animation:none"></span></span><span class="ces-star" style="top:16%;animation:none"><span class="ces-star__dot" style="left:47.2%;--ces-b:0.842;animation:none"></span></span><span class="ces-star" style="top:92%;animation:none"><span class="ces-star__dot" style="left:9.0%;--ces-b:0.873;animation:none"></span></span><span class="ces-star" style="top:44%;animation:none"><span class="ces-star__dot" style="left:70.8%;--ces-b:0.905;animation:none"></span></span><span class="ces-star" style="top:76%;animation:none"><span class="ces-star__dot" style="left:32.6%;--ces-b:0.545;animation:none"></span></span><span class="ces-star" style="top:56%;animation:none"><span class="ces-star__dot" style="left:94.4%;--ces-b:0.577;animation:none"></span></span><span class="ces-star" style="top:88%;animation:none"><span class="ces-star__dot" style="left:56.2%;--ces-b:0.608;animation:none"></span></span><span class="ces-star" style="top:40%;animation:none"><span class="ces-star__dot" style="left:18.0%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:36%;animation:none"><span class="ces-star__dot" style="left:79.8%;--ces-b:0.779;animation:none"></span></span></div>
+      </div></div>
+      <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+      <div class="ces-knob" style="left:calc(14px + 0.6667 * (100% - 28px));--ces-hl:28.0%"></div>
+    </div>
+  </div><span class="detail">拖 400px/秒（= 1.72 pct/秒）→ 横向 ×1.0915、纵向 ×0.9162（横×纵 = 1.0000，折合约 2.56px）</span></div>
+  <div class="row"><span class="tag">快拖</span><div class="ces-inline" data-energy="1" style="--ces-energy:0.5000;width:260px;--ces-fill-offset:0.0000;--ces-skew:0.000deg;--ces-stx:1.1153;--ces-sty:0.8966;--ces-bounce:1.0000;--ces-press:1">
+    <div class="ces-track" role="slider">
+      <div class="ces-water" style="width:calc(calc(14px + 0.6667 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1) + min(0px, var(--ces-fill-offset,0) * 14px))"><div class="ces-water-inner">
+        <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(147,51,234))"></div>
+        <div class="ces-energy"></div>
+        <div class="ces-stars" style="opacity:0.800"><span class="ces-star" style="top:52%;animation:none"><span class="ces-star__dot" style="left:61.8%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:84%;animation:none"><span class="ces-star__dot" style="left:23.6%;--ces-b:0.671;animation:none"></span></span><span class="ces-star" style="top:64%;animation:none"><span class="ces-star__dot" style="left:85.4%;--ces-b:0.703;animation:none"></span></span><span class="ces-star" style="top:16%;animation:none"><span class="ces-star__dot" style="left:47.2%;--ces-b:0.842;animation:none"></span></span><span class="ces-star" style="top:92%;animation:none"><span class="ces-star__dot" style="left:9.0%;--ces-b:0.873;animation:none"></span></span><span class="ces-star" style="top:44%;animation:none"><span class="ces-star__dot" style="left:70.8%;--ces-b:0.905;animation:none"></span></span><span class="ces-star" style="top:76%;animation:none"><span class="ces-star__dot" style="left:32.6%;--ces-b:0.545;animation:none"></span></span><span class="ces-star" style="top:56%;animation:none"><span class="ces-star__dot" style="left:94.4%;--ces-b:0.577;animation:none"></span></span><span class="ces-star" style="top:88%;animation:none"><span class="ces-star__dot" style="left:56.2%;--ces-b:0.608;animation:none"></span></span><span class="ces-star" style="top:40%;animation:none"><span class="ces-star__dot" style="left:18.0%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:36%;animation:none"><span class="ces-star__dot" style="left:79.8%;--ces-b:0.779;animation:none"></span></span></div>
+      </div></div>
+      <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+      <div class="ces-knob" style="left:calc(14px + 0.6667 * (100% - 28px));--ces-hl:28.0%"></div>
+    </div>
+  </div><span class="detail">拖 900px/秒（= 3.88 pct/秒）→ 横向 ×1.1153、纵向 ×0.8966（横×纵 = 1.0000，折合约 3.23px）</span></div>
+  <div class="row"><span class="tag">落档峰值</span><div class="ces-inline" data-energy="1" style="--ces-energy:0.5000;width:260px;--ces-fill-offset:0.0000;--ces-skew:0.000deg;--ces-stx:1.0000;--ces-sty:1.0000;--ces-bounce:1.0600;--ces-press:1">
+    <div class="ces-track" role="slider">
+      <div class="ces-water" style="width:calc(calc(14px + 0.6667 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1) + min(0px, var(--ces-fill-offset,0) * 14px))"><div class="ces-water-inner">
+        <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(147,51,234))"></div>
+        <div class="ces-energy"></div>
+        <div class="ces-stars" style="opacity:0.800"><span class="ces-star" style="top:52%;animation:none"><span class="ces-star__dot" style="left:61.8%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:84%;animation:none"><span class="ces-star__dot" style="left:23.6%;--ces-b:0.671;animation:none"></span></span><span class="ces-star" style="top:64%;animation:none"><span class="ces-star__dot" style="left:85.4%;--ces-b:0.703;animation:none"></span></span><span class="ces-star" style="top:16%;animation:none"><span class="ces-star__dot" style="left:47.2%;--ces-b:0.842;animation:none"></span></span><span class="ces-star" style="top:92%;animation:none"><span class="ces-star__dot" style="left:9.0%;--ces-b:0.873;animation:none"></span></span><span class="ces-star" style="top:44%;animation:none"><span class="ces-star__dot" style="left:70.8%;--ces-b:0.905;animation:none"></span></span><span class="ces-star" style="top:76%;animation:none"><span class="ces-star__dot" style="left:32.6%;--ces-b:0.545;animation:none"></span></span><span class="ces-star" style="top:56%;animation:none"><span class="ces-star__dot" style="left:94.4%;--ces-b:0.577;animation:none"></span></span><span class="ces-star" style="top:88%;animation:none"><span class="ces-star__dot" style="left:56.2%;--ces-b:0.608;animation:none"></span></span><span class="ces-star" style="top:40%;animation:none"><span class="ces-star__dot" style="left:18.0%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:36%;animation:none"><span class="ces-star__dot" style="left:79.8%;--ces-b:0.779;animation:none"></span></span></div>
+      </div></div>
+      <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+      <div class="ces-knob" style="left:calc(14px + 0.6667 * (100% - 28px));--ces-hl:28.0%"></div>
+    </div>
+  </div><span class="detail">落档冲过刻度那一刻 → ×1.0600（过冲峰值 = 1 + KNOB_BOUNCE_MAX = 1.06）</span></div>
+  <div class="row"><span class="tag">按压</span><div class="ces-inline" data-energy="1" style="--ces-energy:0.5000;width:260px;--ces-fill-offset:0.0000;--ces-skew:0.000deg;--ces-stx:1.0000;--ces-sty:1.0000;--ces-bounce:1.0000;--ces-press:0.95">
+    <div class="ces-track" role="slider">
+      <div class="ces-water" style="width:calc(calc(14px + 0.6667 * (100% - 28px)) + 1 * 14px * var(--ces-press,1) * var(--ces-bounce,1) * var(--ces-stx,1) + min(0px, var(--ces-fill-offset,0) * 14px))"><div class="ces-water-inner">
+        <div class="ces-fill" style="background:linear-gradient(90deg, rgb(77,147,248), rgb(147,51,234))"></div>
+        <div class="ces-energy"></div>
+        <div class="ces-stars" style="opacity:0.800"><span class="ces-star" style="top:52%;animation:none"><span class="ces-star__dot" style="left:61.8%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:84%;animation:none"><span class="ces-star__dot" style="left:23.6%;--ces-b:0.671;animation:none"></span></span><span class="ces-star" style="top:64%;animation:none"><span class="ces-star__dot" style="left:85.4%;--ces-b:0.703;animation:none"></span></span><span class="ces-star" style="top:16%;animation:none"><span class="ces-star__dot" style="left:47.2%;--ces-b:0.842;animation:none"></span></span><span class="ces-star" style="top:92%;animation:none"><span class="ces-star__dot" style="left:9.0%;--ces-b:0.873;animation:none"></span></span><span class="ces-star" style="top:44%;animation:none"><span class="ces-star__dot" style="left:70.8%;--ces-b:0.905;animation:none"></span></span><span class="ces-star" style="top:76%;animation:none"><span class="ces-star__dot" style="left:32.6%;--ces-b:0.545;animation:none"></span></span><span class="ces-star" style="top:56%;animation:none"><span class="ces-star__dot" style="left:94.4%;--ces-b:0.577;animation:none"></span></span><span class="ces-star" style="top:88%;animation:none"><span class="ces-star__dot" style="left:56.2%;--ces-b:0.608;animation:none"></span></span><span class="ces-star" style="top:40%;animation:none"><span class="ces-star__dot" style="left:18.0%;--ces-b:0.639;animation:none"></span></span><span class="ces-star" style="top:36%;animation:none"><span class="ces-star__dot" style="left:79.8%;--ces-b:0.779;animation:none"></span></span></div>
+      </div></div>
+      <span class="ces-tick" data-on="1" style="left:calc(14px + 0 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.3333 * (100% - 28px))"></span><span class="ces-tick" data-on="1" style="left:calc(14px + 0.6667 * (100% - 28px))"></span><span class="ces-tick" data-on="0" style="left:calc(14px + 1 * (100% - 28px))"></span>
+      <div class="ces-knob" style="left:calc(14px + 0.6667 * (100% - 28px));--ces-hl:28.0%"></div>
+    </div>
+  </div><span class="detail">按住（data-dragging）→ ×0.95（CSS 给的，不用 JS）</span></div>
+</div>
+</body>
+</html>
